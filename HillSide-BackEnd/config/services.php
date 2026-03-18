@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'meta' => [
+        'oauth_url' => env('META_OAUTH_URL', 'https://www.facebook.com/v21.0/dialog/oauth'),
+    ],
+
 ];
