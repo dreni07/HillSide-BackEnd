@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Feedback\StoreFeedbackRequest;
 use App\Models\Conversation;
 use App\Models\Feedback;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -43,6 +44,85 @@ class FeedbackController extends Controller
             'summary' => $summary,
             'goodExamples' => $goodExamples,
             'badExamples' => $badExamples,
+        ]);
+    }
+
+    public function overview(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $feedbackQuery = Feedback::query()
+            ->with(['message', 'conversation.channel'])
+            ->whereHas('conversation', function (Builder $q) use ($user) {
+                if ($user->is_admin) {
+                    // Adminët shohin gjithë feedback-un.
+                    return;
+                }
+
+                $q->where('user_id', $user->id);
+            });
+
+        $grouped = $feedbackQuery->get()
+            ->groupBy(function (Feedback $fb) {
+                return $fb->conversation_id . ':' . ($fb->message_id ?? 'null');
+            });
+
+        $items = [];
+
+        foreach ($grouped as $key => $group) {
+            /** @var \Illuminate\Support\Collection<int, Feedback> $group */
+            $first = $group->first();
+            if (!$first) {
+                continue;
+            }
+
+            $conversation = $first->conversation;
+            $message = $first->message;
+            $channel = $conversation?->channel;
+
+            $likes = $group->where('rating', '>=', 4)->count();
+            $dislikes = $group->where('rating', '<=', 2)->count();
+            $avgRating = $group->avg('rating');
+            $lastFeedbackAt = optional($group->max('created_at'))->toIso8601String();
+
+            $items[] = [
+                'conversationId' => (string) $first->conversation_id,
+                'messageId' => (string) ($first->message_id ?? ''),
+                'feedbackCount' => $group->count(),
+                'dislikes' => $dislikes,
+                'likes' => $likes,
+                'avgRating' => $avgRating,
+                'lastFeedbackAt' => $lastFeedbackAt,
+                'message' => $message ? [
+                    'content' => [
+                        'text' => $message->text,
+                    ],
+                    'timestamp' => optional($message->created_at)->toIso8601String(),
+                    'senderType' => $message->is_from_user ? 'customer' : 'human_agent',
+                    'direction' => $message->is_from_user ? 'in' : 'out',
+                    'sentimentScore' => null,
+                    'sentimentLabel' => null,
+                    'sentimentProvider' => null,
+                ] : null,
+                'conversation' => $conversation ? [
+                    'platformUserId' => 'Unknown',
+                    'channel' => $channel ? [
+                        '_id' => (string) $channel->id,
+                        'name' => $channel->name,
+                        'platform' => $channel->platform,
+                    ] : null,
+                ] : null,
+            ];
+        }
+
+        // Rradhit sipas feedback-ut më të fundit.
+        usort($items, function (array $a, array $b) {
+            return strcmp($b['lastFeedbackAt'] ?? '', $a['lastFeedbackAt'] ?? '');
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $items,
         ]);
     }
 

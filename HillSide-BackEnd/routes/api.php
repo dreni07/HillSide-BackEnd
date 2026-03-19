@@ -4,10 +4,13 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AutomationRuleController;
 use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\ChannelController;
+use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\ConversationMessageController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\KeywordResponseController;
 use App\Http\Controllers\Api\MetaOAuthController;
+use App\Http\Controllers\Api\StatsController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,12 +39,20 @@ Route::middleware('jwt.auth')->group(function () {
     Route::put('channels/{channel}', [ChannelController::class, 'update']);
     Route::delete('channels/{channel}', [ChannelController::class, 'destroy']);
 
+    Route::get('contacts', [ContactController::class, 'index']);
+    Route::get('contacts/{contact}', [ContactController::class, 'show']);
+    Route::put('contacts/{contact}', [ContactController::class, 'update']);
+
+    Route::get('conversations', [ConversationController::class, 'index']);
     Route::get('conversations/{conversation}/messages', [ConversationMessageController::class, 'index']);
     Route::post('conversations/{conversation}/messages', [ConversationMessageController::class, 'store']);
 
     Route::get('feedback/conversation/{conversation}', [FeedbackController::class, 'showByConversation']);
     Route::get('feedback/coaching', [FeedbackController::class, 'coachingSummary']);
+    Route::get('feedback/overview', [FeedbackController::class, 'overview']);
     Route::post('feedback', [FeedbackController::class, 'store']);
+
+    Route::get('stats/overview', [StatsController::class, 'overview']);
 
     Route::get('automation-rules', [AutomationRuleController::class, 'index']);
     Route::post('automation-rules', [AutomationRuleController::class, 'store']);
