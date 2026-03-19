@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\AiConfigController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AutomationRuleController;
 use App\Http\Controllers\Api\BusinessController;
+use App\Http\Controllers\Api\BusinessTypeController;
 use App\Http\Controllers\Api\ChannelController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ConversationController;
@@ -14,56 +16,102 @@ use App\Http\Controllers\Api\StatsController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('auth')->group(function () {
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('register', [AuthController::class, 'register']);
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
-    Route::middleware('jwt.auth')->group(function () {
-        Route::get('me', [AuthController::class, 'me']);
-        Route::patch('me', [AuthController::class, 'updateMe']);
-        Route::get('me/export', [AuthController::class, 'exportMe']);
-        Route::delete('me', [AuthController::class, 'deleteMe']);
-    });
+Route::controller(AuthController::class)->prefix('auth')->group(function () {
+    Route::post('login', 'login');
+    Route::post('register', 'register');
 });
+
+Route::controller(MetaOAuthController::class)->prefix('oauth')->group(function () {
+    Route::get('meta/start', 'start');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('jwt.auth')->group(function () {
-    Route::get('business/me', [BusinessController::class, 'show']);
-    Route::patch('business/me', [BusinessController::class, 'update']);
 
-    Route::middleware('can:isAdmin')->group(function () {
-        Route::get('users', [UserController::class, 'index']);
+    Route::controller(AuthController::class)->prefix('auth')->group(function () {
+        Route::get('me', 'me');
+        Route::patch('me', 'updateMe');
+        Route::get('me/export', 'exportMe');
+        Route::delete('me', 'deleteMe');
     });
 
-    Route::get('channels', [ChannelController::class, 'index']);
-    Route::get('channels/{channel}', [ChannelController::class, 'show']);
-    Route::put('channels/{channel}', [ChannelController::class, 'update']);
-    Route::delete('channels/{channel}', [ChannelController::class, 'destroy']);
+    Route::controller(BusinessTypeController::class)->group(function () {
+        Route::get('business-types', 'index');
+    });
 
-    Route::get('contacts', [ContactController::class, 'index']);
-    Route::get('contacts/{contact}', [ContactController::class, 'show']);
-    Route::put('contacts/{contact}', [ContactController::class, 'update']);
+    Route::controller(BusinessController::class)->group(function () {
+        Route::get('business/me', 'show');
+        Route::post('businesses', 'store');
+        Route::put('businesses/{business}', 'update');
+        Route::put('businesses/{business}/business-type', 'assignBusinessType');
+    });
 
-    Route::get('conversations', [ConversationController::class, 'index']);
-    Route::get('conversations/{conversation}/messages', [ConversationMessageController::class, 'index']);
-    Route::post('conversations/{conversation}/messages', [ConversationMessageController::class, 'store']);
+    Route::controller(AiConfigController::class)->prefix('businesses/{business}')->group(function () {
+        Route::post('ai-config', 'store');
+        Route::get('ai-config', 'show');
+    });
 
-    Route::get('feedback/conversation/{conversation}', [FeedbackController::class, 'showByConversation']);
-    Route::get('feedback/coaching', [FeedbackController::class, 'coachingSummary']);
-    Route::get('feedback/overview', [FeedbackController::class, 'overview']);
-    Route::post('feedback', [FeedbackController::class, 'store']);
+    Route::controller(ChannelController::class)->prefix('channels')->group(function () {
+        Route::get('/', 'index');
+        Route::get('{channel}', 'show');
+        Route::put('{channel}', 'update');
+        Route::delete('{channel}', 'destroy');
+    });
 
-    Route::get('stats/overview', [StatsController::class, 'overview']);
+    Route::controller(ContactController::class)->prefix('contacts')->group(function () {
+        Route::get('/', 'index');
+        Route::get('{contact}', 'show');
+        Route::put('{contact}', 'update');
+    });
 
-    Route::get('automation-rules', [AutomationRuleController::class, 'index']);
-    Route::post('automation-rules', [AutomationRuleController::class, 'store']);
-    Route::put('automation-rules/{automationRule}', [AutomationRuleController::class, 'update']);
-    Route::delete('automation-rules/{automationRule}', [AutomationRuleController::class, 'destroy']);
+    Route::prefix('conversations')->group(function () {
+        Route::get('/', [ConversationController::class, 'index']);
 
-    Route::get('keyword-responses', [KeywordResponseController::class, 'index']);
-    Route::post('keyword-responses', [KeywordResponseController::class, 'store']);
-    Route::put('keyword-responses/{keywordResponse}', [KeywordResponseController::class, 'update']);
-    Route::delete('keyword-responses/{keywordResponse}', [KeywordResponseController::class, 'destroy']);
+        Route::controller(ConversationMessageController::class)->prefix('{conversation}/messages')->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store');
+        });
+    });
+
+    Route::controller(FeedbackController::class)->prefix('feedback')->group(function () {
+        Route::get('conversation/{conversation}', 'showByConversation');
+        Route::get('coaching', 'coachingSummary');
+        Route::get('overview', 'overview');
+        Route::post('/', 'store');
+    });
+
+    Route::controller(StatsController::class)->prefix('stats')->group(function () {
+        Route::get('overview', 'overview');
+    });
+
+    Route::controller(AutomationRuleController::class)->prefix('automation-rules')->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::put('{automationRule}', 'update');
+        Route::delete('{automationRule}', 'destroy');
+    });
+
+    Route::controller(KeywordResponseController::class)->prefix('keyword-responses')->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::put('{keywordResponse}', 'update');
+        Route::delete('{keywordResponse}', 'destroy');
+    });
+
+    Route::middleware('can:isAdmin')->group(function () {
+        Route::controller(UserController::class)->group(function () {
+            Route::get('users', 'index');
+        });
+    });
 });
-
-Route::get('oauth/meta/start', [MetaOAuthController::class, 'start']);
-
