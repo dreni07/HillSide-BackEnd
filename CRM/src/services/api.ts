@@ -53,6 +53,19 @@ export interface ApiError {
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError;
 
+export interface Business {
+  id: number;
+  user_id: number;
+  name: string;
+  description: string | null;
+  industry: string | null;
+  target_audience: string | null;
+  location: string | null;
+  language: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Instance globale e axios me baseURL dhe header-at default. */
 export const apiClient = axios.create({
   baseURL: env.apiUrl,
