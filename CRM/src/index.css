@@ -337,6 +337,21 @@ body {
   text-decoration: underline;
 }
 
+.landing-auth-card .auth-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #d1d5db;
+  cursor: pointer;
+  user-select: none;
+}
+
+.landing-auth-card .auth-remember input[type='checkbox'] {
+  width: auto;
+}
+
 .landing-auth-card .auth-resend-btn {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
