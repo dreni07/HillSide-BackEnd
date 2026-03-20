@@ -113,6 +113,243 @@ body {
   cursor: not-allowed;
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0 0.75rem;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.auth-card button.auth-google-btn {
+  background: transparent;
+  border: 1px solid #cbd5e0;
+  color: #2d3748;
+  box-shadow: none;
+}
+
+.auth-card button.auth-google-btn:hover:not(:disabled) {
+  background: #f7fafc;
+  color: #2d3748;
+}
+
+.auth-card button.auth-google-btn:disabled {
+  opacity: 0.7;
+}
+
+.auth-google-icon {
+  font-weight: 700;
+}
+
+.landing-auth-card {
+  width: 100%;
+  max-width: 22rem;
+  padding: 1.75rem 1.75rem 1.5rem;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 16, 22, 0.98) 0%,
+    rgba(12, 12, 16, 0.98) 55%,
+    rgba(10, 10, 14, 0.3) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  color: #e5e7eb;
+  text-align: left;
+}
+
+.landing-auth-card h1 {
+  margin: 0 0 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.landing-auth-card .auth-hint {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #9ca3af;
+}
+
+.landing-auth-card label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #d1d5db;
+}
+
+.landing-auth-card input {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.6rem 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: #e5e7eb;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.landing-auth-card input::placeholder {
+  color: #6b7280;
+}
+
+.landing-auth-card input:focus {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+
+.landing-auth-card .auth-show-password {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: #d1d5db;
+  cursor: pointer;
+}
+
+.landing-auth-card .auth-show-password input[type='checkbox'] {
+  width: auto;
+  margin-top: 0;
+  cursor: pointer;
+}
+
+.landing-auth-card button {
+  width: 100%;
+  margin-top: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  color: #fff;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(99, 102, 241, 0.9) 100%);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.landing-auth-card button:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(99, 102, 241, 1) 100%);
+  border-color: rgba(167, 139, 250, 0.65);
+  box-shadow:
+    0 0 28px rgba(139, 92, 246, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.landing-auth-card button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: saturate(0.85);
+}
+
+.landing-auth-card .auth-divider {
+  margin: 1rem 0 0.75rem;
+  color: #9ca3af;
+}
+
+.landing-auth-card .auth-divider::before,
+.landing-auth-card .auth-divider::after {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.landing-auth-card button.auth-google-btn {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d1d5db;
+  box-shadow: none;
+}
+
+.landing-auth-card button.auth-google-btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #f3f4f6;
+}
+
+.landing-auth-card button.auth-google-btn:disabled {
+  opacity: 0.45;
+}
+
+.landing-auth-card .auth-error {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  border-radius: 10px;
+  font-size: 0.875rem;
+}
+
+.landing-auth-card .form-success {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  color: #34d399;
+  border-radius: 10px;
+  font-size: 0.875rem;
+}
+
+.landing-auth-card .field-error {
+  margin-top: 0.3rem;
+  font-size: 0.8125rem;
+  color: #f87171;
+  font-weight: 400;
+}
+
+.landing-auth-card .auth-footer {
+  margin: 1rem 0 0;
+  font-size: 0.875rem;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.landing-auth-card .auth-footer a {
+  color: #a78bfa;
+  text-decoration: none;
+}
+
+.landing-auth-card .auth-footer a:hover {
+  text-decoration: underline;
+}
+
+.landing-auth-card .auth-resend-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d1d5db;
+  box-shadow: none;
+}
+
+.landing-auth-card .auth-resend-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: none;
+}
+
 .auth-error {
   margin-bottom: 1rem;
   padding: 0.5rem 0.75rem;
@@ -2698,3 +2935,78 @@ body {
   padding-top: 1.5rem;
   border-top: 1px solid #e2e8f0;
 }
+
+/* Add products page */
+.page-add-products h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.page-add-products-subtitle {
+  margin: 0 0 1.5rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.products-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.products-tab-button--active {
+  background: #3182ce;
+  color: #fff;
+}
+
+.products-upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px dashed #a0aec0;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.products-upload-box:hover {
+  border-color: #3182ce;
+}
+
+.products-upload-input {
+  display: none;
+}
+
+.products-upload-box-title {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.products-upload-box-hint {
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.products-json {
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: auto;
+  max-height: 14rem;
+}
+
+.products-json pre {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #2d3748;
+}
+
+.products-import-preview {
+  margin-top: 1rem;
+}
+
