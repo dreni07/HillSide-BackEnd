@@ -1,0 +1,69 @@
+name: Test & deploy backend
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: 
+
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Laravel tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: HillSide-BackEnd
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, fileinfo, json, tokenizer, bcmath, pdo_sqlite
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('HillSide-BackEnd/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Prepare application environment
+        run: |
+          if [ ! -f .env ]; then cp .env.example .env; fi
+          php artisan key:generate --force
+
+      - name: Run tests
+        run: composer test
+
+  deploy:
+    name: Deploy to Forge
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - name: Trigger Forge deployment
+        env:
+          FORGE_DEPLOY_WEBHOOK: ${{ secrets.FORGE_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$FORGE_DEPLOY_WEBHOOK" ]; then
+            echo "::error::Secret FORGE_DEPLOY_WEBHOOK is not set. Add it in Repo → Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          curl -fsS -X POST "$FORGE_DEPLOY_WEBHOOK" -o /dev/null -w "Forge responded HTTP %{http_code}\n"
