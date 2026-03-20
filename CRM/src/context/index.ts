@@ -1,2 +1,2 @@
-// Global state management - contexts & providers
-// Example: export { AppProvider, useApp } from './AppContext';
+export { AuthProvider, useAuth } from './AuthContext';
+export { OnboardingProvider, useOnboarding } from './OnboardingContext';

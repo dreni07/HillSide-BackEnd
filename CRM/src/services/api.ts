@@ -5,6 +5,18 @@
 
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios';
 import { env } from '../config/env';
+import type { StoredUser, ApiSuccess, ApiError, ApiResponse, AuthResponse } from '../types/api';
+
+export type {
+  StoredUser,
+  ApiSuccess,
+  ApiError,
+  ApiResponse,
+  BusinessType,
+  Business,
+  BusinessTypesResponse,
+  AuthResponse,
+} from '../types/api';
 
 const STORAGE_KEY_TOKEN = 'crm_token';
 const STORAGE_KEY_USER = 'crm_user';
@@ -33,40 +45,6 @@ export function clearStoredAuth(): void {
   localStorage.removeItem(STORAGE_KEY_USER);
 }
 
-export interface StoredUser {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'client';
-}
-
-export interface ApiSuccess<T> {
-  success: true;
-  data: T;
-  token?: string;
-}
-
-export interface ApiError {
-  success: false;
-  message: string;
-}
-
-export type ApiResponse<T> = ApiSuccess<T> | ApiError;
-
-export interface Business {
-  id: number;
-  user_id: number;
-  name: string;
-  description: string | null;
-  industry: string | null;
-  target_audience: string | null;
-  location: string | null;
-  language: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-/** Instance globale e axios me baseURL dhe header-at default. */
 export const apiClient = axios.create({
   baseURL: env.apiUrl,
   headers: {
@@ -84,7 +62,6 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-/** 401 → fshirja e tokenit dhe ridrejtimi te Login. */
 function handleUnauthorized(): never {
   clearStoredAuth();
   window.location.replace('/login');
@@ -104,16 +81,12 @@ function extractValidationMessage(data: unknown): string | null {
   return null;
 }
 
-/**
- * Bën një kërkesë te API. Shton Authorization: Bearer <token> nëse ka token.
- * 401 → fshin tokenin dhe ridrejton te Login. 403 → "Nuk keni qasje." 404/500 → mesazh i qartë.
- */
+
 export async function apiRequest<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<ApiSuccess<T>['data']> {
   const url = path.startsWith('http') ? path : `${env.apiUrl}${path}`;
-  // Përputhje me përdorimet ekzistuese të apiRequest (që dërgojnë JSON.stringify në body).
   let data: unknown;
   if (options.body !== undefined) {
     if (typeof options.body === 'string') {
@@ -189,15 +162,6 @@ export async function apiRequest<T>(
     }
     throw new Error('Gabim në komunikim me serverin. Kontrolloni lidhjen dhe provoni përsëri.');
   }
-}
-
-/**
- * Për login/register ku përgjigja përmban edhe token.
- */
-export interface AuthResponse {
-  success: true;
-  data: StoredUser;
-  token: string;
 }
 
 export async function apiAuthRequest<T = AuthResponse['data']>(
