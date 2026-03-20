@@ -20,6 +20,7 @@ export const navItems: NavItem[] = [
   { path: '/app/profile', label: 'Profili im', role: 'client' },
   { path: '/app/business', label: 'Biznesi im', role: 'client' },
   { path: '/app/channels', label: 'Kanale', role: 'client' },
+  { path: '/app/add-products', label: 'Shto Produkte', role: 'client' },
   { path: '/app/inbox', label: 'Inbox', role: 'client' },
   { path: '/app/contacts', label: 'Kontaktet', role: 'client' },
   { path: '/app/automation', label: 'Automatikë', role: 'client' },

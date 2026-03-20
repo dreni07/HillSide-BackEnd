@@ -1,14 +1,19 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { PasswordResetProvider } from './context/PasswordResetContext';
 import { Layout, ProtectedRoute, AdminRoute } from './components';
 import {
   Login,
   Register,
+  ForgotPassword,
+  VerificationCode,
+  ResetPassword,
   CompanyOnboarding,
   Landing,
   Privacy,
   Terms,
   Dashboard,
+  AddProducts,
   Klientet,
   ClientSettings,
   Channels,
@@ -51,6 +56,30 @@ function AppRoutes() {
           që të mos pengohet ridrejtimi tek onboarding pas regjistrimit. */}
       <Route path="/register" element={<Register />} />
       <Route
+        path="/forgot-password"
+        element={
+          <PublicOnlyRoute>
+            <ForgotPassword />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/verify-code"
+        element={
+          <PublicOnlyRoute>
+            <VerificationCode />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <PublicOnlyRoute>
+            <ResetPassword />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
         path="/onboarding/company"
         element={
           <ProtectedRoute>
@@ -67,6 +96,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route path="add-products" element={<AddProducts />} />
         <Route path="klientet" element={<AdminRoute><Klientet /></AdminRoute>} />
         <Route path="klientet/:userId/cilesime" element={<AdminRoute><ClientSettings /></AdminRoute>} />
         <Route path="profile" element={<Profile />} />
@@ -94,7 +124,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <PasswordResetProvider>
+          <AppRoutes />
+        </PasswordResetProvider>
       </AuthProvider>
     </BrowserRouter>
   );

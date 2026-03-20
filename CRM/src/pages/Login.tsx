@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getStoredUser } from '../services/api';
+import { GoogleContinueButton } from '../components/auth/GoogleContinueButton';
+import { AuthCard, AuthPage } from '../components/auth/AuthLayout';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +11,7 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthMessage, setOauthMessage] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,8 +38,8 @@ export function Login() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <AuthPage>
+      <AuthCard>
         <h1>Hyr në CRM</h1>
         <form onSubmit={handleSubmit}>
           {error && <div className="auth-error" role="alert">{error}</div>}
@@ -72,11 +75,25 @@ export function Login() {
           <button type="submit" disabled={loading}>
             {loading ? 'Duke hyrë…' : 'Hyr'}
           </button>
+
+          <div className="auth-divider">ose</div>
+
+          <GoogleContinueButton
+            disabled={loading}
+            onClick={() => {
+              setOauthMessage('Demo: vazhdo me Google (UI vetëm). Integrimi real do të shtohet më vonë.');
+            }}
+            label="Continue with Google"
+          />
+
+          {oauthMessage && <div className="auth-hint" style={{ marginTop: '0.75rem' }}>{oauthMessage}</div>}
         </form>
         <p className="auth-footer">
+          <Link to="/forgot-password">Keni harruar fjalëkalimin?</Link>
+          <span style={{ margin: '0 0.5rem' }}>·</span>
           Nuk keni llogari? <Link to="/register">Regjistrohuni</Link>
         </p>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthPage>
   );
 }
