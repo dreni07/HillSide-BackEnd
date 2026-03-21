@@ -2,8 +2,6 @@ import type { OnboardingFormData } from '../types/onboarding';
 
 export const DRAFT_KEY = 'companyOnboardingDraft';
 
-export const OTHER_VALUE = 'other';
-
 export const EMPTY_FORM: OnboardingFormData = {
   companyName: '',
   description: '',
@@ -14,11 +12,6 @@ export const EMPTY_FORM: OnboardingFormData = {
   timezone: '',
   businessTypeId: null,
   customBusinessType: '',
-};
-
-export const CATEGORY_LABELS: Record<string, string> = {
-  commerce: 'Komercë (shitje produktesh)',
-  services: 'Shërbime',
 };
 
 export const TIMEZONES = [

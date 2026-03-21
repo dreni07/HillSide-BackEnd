@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
 import { MouseGlow } from '../MouseGlow';
 
-export function AuthPage({ children }: { children: ReactNode }) {
+type AuthPageProps = { children: ReactNode; className?: string };
+
+export function AuthPage({ children, className }: AuthPageProps) {
   return (
-    <MouseGlow className="landing-v2 landing-auth">
+    <MouseGlow className={['landing-v2', 'landing-auth', className].filter(Boolean).join(' ')}>
       {/* Landing background (grid + mouse glow) */}
       <div className="landing-v2-bg" aria-hidden>
         <div className="landing-v2-bg-grid" aria-hidden />
@@ -13,7 +15,9 @@ export function AuthPage({ children }: { children: ReactNode }) {
   );
 }
 
-export function AuthCard({ children }: { children: ReactNode }) {
-  return <div className="landing-auth-card">{children}</div>;
+type AuthCardProps = { children: ReactNode; className?: string };
+
+export function AuthCard({ children, className }: AuthCardProps) {
+  return <div className={['landing-auth-card', className].filter(Boolean).join(' ')}>{children}</div>;
 }
 

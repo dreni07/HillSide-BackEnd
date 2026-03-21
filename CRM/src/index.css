@@ -131,6 +131,11 @@ body {
 }
 
 .auth-card button.auth-google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1.15rem;
   background: transparent;
   border: 1px solid #cbd5e0;
   color: #2d3748;
@@ -147,7 +152,32 @@ body {
 }
 
 .auth-google-icon {
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.15rem;
+  line-height: 0;
+}
+
+.auth-google-icon svg {
+  display: block;
+}
+
+.auth-google-label {
+  line-height: 1.25;
+}
+
+/* Google “G” vetëm e bardhë; në kartë të bardhë sfond i errët te ikona për kontrast */
+.auth-card button.auth-google-btn .auth-google-icon {
+  background: #2d3748;
+  border-radius: 8px;
+  color: #fff;
+  padding: 0.3rem 0.35rem;
+}
+
+.landing-auth-card button.auth-google-btn .auth-google-icon {
+  color: #fff;
 }
 
 .landing-auth-card {
@@ -278,6 +308,11 @@ body {
 }
 
 .landing-auth-card button.auth-google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1.15rem;
   background-color: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #d1d5db;
@@ -365,6 +400,161 @@ body {
   box-shadow: none;
 }
 
+/* Auth pages me formë të gjatë (onboarding) — fillim nga lart, scroll i qetë */
+.landing-auth--scroll .landing-v2-main {
+  justify-content: flex-start;
+  padding-top: 2.5rem;
+  padding-bottom: 3rem;
+}
+
+.landing-auth-card.company-onboarding-card {
+  max-width: 28rem;
+}
+
+.landing-auth-card .company-onboarding-hint {
+  margin-bottom: 1.5rem;
+}
+
+.landing-auth-card .company-onboarding-form textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.6rem 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: #e5e7eb;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  resize: vertical;
+}
+
+/* Select (timezone, lloji i biznesit) — i përshtatur me kartën e errët */
+.landing-auth-card .company-onboarding-form select {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.6rem 2.5rem 0.6rem 0.85rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: #e5e7eb;
+  background-color: rgba(255, 255, 255, 0.06);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
+  color-scheme: dark;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background-color 0.15s;
+}
+
+.landing-auth-card .company-onboarding-form select:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.landing-auth-card .company-onboarding-form select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.landing-auth-card .company-onboarding-form select option,
+.landing-auth-card .company-onboarding-form select optgroup {
+  background-color: #14141a;
+  color: #e5e7eb;
+}
+
+.landing-auth-card .company-onboarding-form select optgroup {
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.landing-auth-card .company-onboarding-form textarea::placeholder {
+  color: #6b7280;
+}
+
+.landing-auth-card .company-onboarding-form textarea:focus,
+.landing-auth-card .company-onboarding-form select:focus {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+
+.landing-auth-card .company-onboarding-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.landing-auth-card .company-onboarding-actions button {
+  width: auto;
+  margin-top: 0;
+}
+
+.landing-auth-card .company-onboarding-actions .btn-secondary {
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d1d5db;
+  box-shadow: none;
+}
+
+.landing-auth-card .company-onboarding-actions .btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #f3f4f6;
+  box-shadow: none;
+}
+
+.landing-auth-card .company-onboarding-actions .btn-primary {
+  flex: 1;
+  min-width: 0;
+}
+
+.landing-auth-card .custom-type-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+}
+
+.landing-auth-card .custom-type-edit {
+  color: #a78bfa;
+}
+
+.landing-auth-card .custom-type-edit:hover {
+  color: #c4b5fd;
+}
+
+.landing-auth-card .onboarding-inline-msg {
+  margin-top: 0.35rem;
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.landing-auth-card .onboarding-inline-msg--muted {
+  color: #9ca3af;
+}
+
+.landing-auth-card .onboarding-inline-msg--error {
+  color: #f87171;
+}
+
 .auth-error {
   margin-bottom: 1rem;
   padding: 0.5rem 0.75rem;
@@ -388,33 +578,6 @@ body {
 
 .auth-footer a:hover {
   text-decoration: underline;
-}
-
-.company-onboarding-card {
-  max-width: 28rem;
-}
-
-.company-onboarding-hint {
-  margin-bottom: 1.5rem;
-}
-
-.company-onboarding-form textarea,
-.company-onboarding-form select {
-  display: block;
-  width: 100%;
-  margin-top: 0.25rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
-  font-size: 1rem;
-  resize: vertical;
-}
-
-.company-onboarding-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
 }
 
 .custom-type-badge {
