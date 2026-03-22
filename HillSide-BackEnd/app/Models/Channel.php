@@ -13,11 +13,19 @@ class Channel extends Model
 
     protected $fillable = [
         'user_id',
+        'platform',
         'name',
         'status',
         'ai_instructions',
         'meta_page_id',
         'meta_access_token',
+        'viber_bot_id',
+        'webhook_verify_token',
+    ];
+
+    protected $hidden = [
+        'meta_access_token',
+        'webhook_verify_token',
     ];
 
     public function user(): BelongsTo

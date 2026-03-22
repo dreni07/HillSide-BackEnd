@@ -29,6 +29,7 @@ Route::controller(AuthController::class)->prefix('auth')->group(function () {
 
 Route::controller(MetaOAuthController::class)->prefix('oauth')->group(function () {
     Route::get('meta/start', 'start');
+    Route::get('meta/callback', 'callback');
 });
 
 /*
@@ -38,6 +39,11 @@ Route::controller(MetaOAuthController::class)->prefix('oauth')->group(function (
 */
 
 Route::middleware('jwt.auth')->group(function () {
+
+    Route::controller(MetaOAuthController::class)->prefix('oauth')->group(function () {
+        Route::get('meta/selection', 'selection');
+        Route::post('meta/connect', 'connect');
+    });
 
     Route::controller(AuthController::class)->prefix('auth')->group(function () {
         Route::get('me', 'me');
@@ -64,6 +70,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::controller(ChannelController::class)->prefix('channels')->group(function () {
         Route::get('/', 'index');
+        Route::post('/', 'store');
         Route::get('{channel}', 'show');
         Route::put('{channel}', 'update');
         Route::delete('{channel}', 'destroy');
