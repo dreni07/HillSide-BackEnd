@@ -29,6 +29,7 @@ import {
   Business,
   Statistics,
   FeedbackOverview,
+  OrdersDashboard,
 } from './pages';
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -107,6 +108,7 @@ function AppRoutes() {
         <Route path="channels/:channelId" element={<ChannelDetail />} />
         <Route path="inbox" element={<Inbox />} />
         <Route path="inbox/:conversationId" element={<InboxThread />} />
+        <Route path="orders" element={<OrdersDashboard />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="contacts/:contactId" element={<ContactDetail />} />
         <Route path="settings" element={<Settings />} />
