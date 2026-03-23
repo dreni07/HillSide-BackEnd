@@ -22,6 +22,7 @@ export const navItems: NavItem[] = [
   { path: '/app/channels', label: 'Kanale', role: 'client' },
   { path: '/app/add-products', label: 'Shto Produkte', role: 'client' },
   { path: '/app/inbox', label: 'Inbox', role: 'client' },
+  { path: '/app/orders', label: 'Porosite', role: 'client' },
   { path: '/app/contacts', label: 'Kontaktet', role: 'client' },
   { path: '/app/automation', label: 'Automatikë', role: 'client' },
   { path: '/app/keyword-responses', label: 'Përgjigje me fjalë kyçe', role: 'client' },
