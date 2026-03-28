@@ -11,6 +11,13 @@ class UpdateChannelRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('aiInstructions') && ! $this->has('ai_instructions')) {
+            $this->merge(['ai_instructions' => $this->input('aiInstructions')]);
+        }
+    }
+
     public function rules(): array
     {
         return [

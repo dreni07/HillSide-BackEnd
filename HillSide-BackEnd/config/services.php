@@ -35,8 +35,32 @@ return [
         ],
     ],
 
+    /*
+     * Meta OAuth: shiko komentet në .env.example për Redirect URI, scopes dhe App ID/Secret
+     * në developers.facebook.com (duhet të përputhen me APP_URL / META_REDIRECT_URI).
+     */
     'meta' => [
-        'oauth_url' => env('META_OAUTH_URL', 'https://www.facebook.com/v21.0/dialog/oauth'),
+        'app_id' => env('META_APP_ID'),
+        'app_secret' => env('META_APP_SECRET'),
+        'oauth_url' => env('META_OAUTH_URL') ?: 'https://www.facebook.com/v21.0/dialog/oauth',
+        /*
+         * Must match exactly a "Valid OAuth Redirect URI" in the Meta app (Facebook Login).
+         * Override if the API is served on a different public URL than APP_URL.
+         */
+        'redirect_uri' => env('META_REDIRECT_URI') ?: rtrim((string) env('APP_URL', 'http://localhost'), '/') . '/api/oauth/meta/callback',
+        'frontend_url' => rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/'),
+        'graph_base_url' => rtrim((string) (env('META_GRAPH_BASE_URL') ?: 'https://graph.facebook.com/v21.0'), '/'),
+        /** Seconds to keep OAuth session data for selection / connect endpoints */
+        'oauth_session_ttl' => (int) env('META_OAUTH_SESSION_TTL', 600),
+        /** Seconds to keep the random OAuth `state` ↔ user_id binding (start → Meta → callback) */
+        'oauth_state_ttl' => (int) env('META_OAUTH_STATE_TTL', 900),
+        'scopes' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env(
+                'META_OAUTH_SCOPES',
+                'pages_show_list,pages_read_engagement,pages_manage_metadata,pages_messaging,instagram_basic,instagram_manage_messages'
+            ))
+        ))),
     ],
 
 ];

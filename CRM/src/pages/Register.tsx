@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { GoogleContinueButton } from '../components/auth/GoogleContinueButton';
+import { AuthCard, AuthPage } from '../components/auth/AuthLayout';
 
 /**
  * Regjistrim vetëm për klientë (kompanitë). Backend krijon User me role "client".
@@ -13,6 +15,7 @@ export function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthMessage, setOauthMessage] = useState<string | null>(null);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -31,8 +34,8 @@ export function Register() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <AuthPage>
+      <AuthCard>
         <h1>Regjistrohu (klient)</h1>
         <p className="auth-hint">Regjistrimi krijon një llogari klient. Admin krijohen nga administratori.</p>
         <form onSubmit={handleSubmit}>
@@ -80,11 +83,23 @@ export function Register() {
           <button type="submit" disabled={loading}>
             {loading ? 'Duke u regjistruar…' : 'Regjistrohu'}
           </button>
+
+          <div className="auth-divider">ose</div>
+
+          <GoogleContinueButton
+            disabled={loading}
+            onClick={() => {
+              setOauthMessage('Demo: vazhdo me Google (UI vetëm). Integrimi real do të shtohet më vonë.');
+            }}
+            label="Continue with Google"
+          />
+
+          {oauthMessage && <div className="auth-hint" style={{ marginTop: '0.75rem' }}>{oauthMessage}</div>}
         </form>
         <p className="auth-footer">
           Keni tashmë llogari? <Link to="/login">Hyni</Link>
         </p>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthPage>
   );
 }

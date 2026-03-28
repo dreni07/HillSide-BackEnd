@@ -3,6 +3,7 @@ import { OnboardingProvider } from '../context/OnboardingContext';
 import { readDraft, useDraftPersistence } from '../hooks/useDraftPersistence';
 import { useOnboardingSubmit } from '../hooks/useOnboardingSubmit';
 import { useOnboarding } from '../context/OnboardingContext';
+import { AuthCard, AuthPage } from '../components/auth/AuthLayout';
 import {
   CompanyInfoFields,
   BusinessTypeSelect,
@@ -26,8 +27,8 @@ function OnboardingForm() {
   );
 
   return (
-    <div className="auth-page">
-      <div className="auth-card company-onboarding-card">
+    <AuthPage className="landing-auth--scroll">
+      <AuthCard className="company-onboarding-card">
         <h1>Na tregoni për biznesin tuaj</h1>
         <p className="auth-hint company-onboarding-hint">
           Këto të dhëna ndihmojnë sistemin dhe inteligjencën artificiale të kuptojnë më mirë biznesin tuaj
@@ -45,8 +46,8 @@ function OnboardingForm() {
           <TimezoneSelect />
           <OnboardingActions />
         </form>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthPage>
   );
 }
 
