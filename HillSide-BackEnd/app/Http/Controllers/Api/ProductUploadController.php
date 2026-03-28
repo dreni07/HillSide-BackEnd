@@ -73,9 +73,14 @@ class ProductUploadController extends Controller
                 $request->file('file')
             );
         } catch (OcrFailedException $e) {
+            Log::warning('Tesseract OCR failed for product image', [
+                'business_id' => $business->id,
+                'detail' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'OCR nuk është i disponueshëm. Në Windows instaloni Tesseract OCR dhe shtoni në .env: TESSERACT_EXECUTABLE="C:\\Program Files\\Tesseract-OCR\\tesseract.exe" (ose rrugën tuaj). Pastaj rinisni Apache/PHP.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (Throwable $e) {
             Log::error('Product image OCR failed', [

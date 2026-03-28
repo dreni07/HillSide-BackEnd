@@ -13,6 +13,7 @@ use App\Services\ProductUpload\Ocr\TesseractOcrEngine;
 use App\Services\ProductUpload\ProductUploadService;
 use App\Services\ProductUpload\Strategies\PdfParsingStrategy;
 use App\Services\ProductUpload\Strategies\SpreadsheetParsingStrategy;
+use App\Support\TesseractPathResolver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -47,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
             $cfg = config('services.tesseract', []);
 
             return new TesseractOcrEngine(
-                (string) ($cfg['executable'] ?? 'tesseract'),
+                TesseractPathResolver::resolve(),
                 (string) ($cfg['languages'] ?? 'eng'),
             );
         });
