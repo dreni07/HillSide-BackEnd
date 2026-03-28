@@ -113,73 +113,6 @@ body {
   cursor: not-allowed;
 }
 
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1rem 0 0.75rem;
-  font-size: 0.875rem;
-  color: #666;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: #e2e8f0;
-}
-
-.auth-card button.auth-google-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  padding: 0.75rem 1.15rem;
-  background: transparent;
-  border: 1px solid #cbd5e0;
-  color: #2d3748;
-  box-shadow: none;
-}
-
-.auth-card button.auth-google-btn:hover:not(:disabled) {
-  background: #f7fafc;
-  color: #2d3748;
-}
-
-.auth-card button.auth-google-btn:disabled {
-  opacity: 0.7;
-}
-
-.auth-google-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  padding: 0.15rem;
-  line-height: 0;
-}
-
-.auth-google-icon svg {
-  display: block;
-}
-
-.auth-google-label {
-  line-height: 1.25;
-}
-
-/* Google “G” vetëm e bardhë; në kartë të bardhë sfond i errët te ikona për kontrast */
-.auth-card button.auth-google-btn .auth-google-icon {
-  background: #2d3748;
-  border-radius: 8px;
-  color: #fff;
-  padding: 0.3rem 0.35rem;
-}
-
-.landing-auth-card button.auth-google-btn .auth-google-icon {
-  color: #fff;
-}
-
 .landing-auth-card {
   width: 100%;
   max-width: 22rem;
@@ -295,38 +228,6 @@ body {
   opacity: 0.45;
   cursor: not-allowed;
   filter: saturate(0.85);
-}
-
-.landing-auth-card .auth-divider {
-  margin: 1rem 0 0.75rem;
-  color: #9ca3af;
-}
-
-.landing-auth-card .auth-divider::before,
-.landing-auth-card .auth-divider::after {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.landing-auth-card button.auth-google-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  padding: 0.75rem 1.15rem;
-  background-color: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #d1d5db;
-  box-shadow: none;
-}
-
-.landing-auth-card button.auth-google-btn:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #f3f4f6;
-}
-
-.landing-auth-card button.auth-google-btn:disabled {
-  opacity: 0.45;
 }
 
 .landing-auth-card .auth-error {
@@ -504,21 +405,6 @@ body {
 .landing-auth-card .company-onboarding-actions button {
   width: auto;
   margin-top: 0;
-}
-
-.landing-auth-card .company-onboarding-actions .btn-secondary {
-  flex: 0 0 auto;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #d1d5db;
-  box-shadow: none;
-}
-
-.landing-auth-card .company-onboarding-actions .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #f3f4f6;
-  box-shadow: none;
 }
 
 .landing-auth-card .company-onboarding-actions .btn-primary {
@@ -1735,46 +1621,7 @@ body {
   border-color: #3182ce;
 }
 
-/* Automation */
-.page-automation h1 {
-  margin: 0 0 1rem;
-  font-size: 1.5rem;
-}
-.automation-admin-filter {
-  margin-bottom: 1rem;
-}
-.automation-admin-filter label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-.automation-channel-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-.automation-channel-row label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-.automation-channel-row select {
-  min-width: 14rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-.automation-hint {
-  color: #666;
-  margin: 0;
-}
+/* Shared table / empty states (p.sh. produkte, dashboard) */
 .automation-empty {
   background: #fff;
   padding: 2rem;

@@ -91,4 +91,49 @@ class Business extends Model
     {
         return $this->hasMany(AiExpectedQuestion::class)->orderBy('sort_order');
     }
+
+    /**
+     * Përputhet me kriteret e formës së onboarding në CRM (të gjitha fushat + lloj biznesi).
+     */
+    public function isProfileCompleteForOnboarding(): bool
+    {
+        $name = trim((string) $this->name);
+        if (strlen($name) < 2) {
+            return false;
+        }
+
+        $desc = trim((string) ($this->description ?? ''));
+        if (strlen($desc) < 10) {
+            return false;
+        }
+
+        if ($this->business_type_id === null) {
+            return false;
+        }
+
+        $phone = trim((string) ($this->phone ?? ''));
+        $digits = preg_replace('/\D/', '', $phone) ?? '';
+        if (strlen($digits) < 8 || strlen($digits) > 15) {
+            return false;
+        }
+
+        $email = trim((string) ($this->email ?? ''));
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        $address = trim((string) ($this->address ?? ''));
+        if (strlen($address) < 5) {
+            return false;
+        }
+
+        $website = trim((string) ($this->website ?? ''));
+        if (! preg_match('#^https?://.+#i', $website)) {
+            return false;
+        }
+
+        $tz = trim((string) ($this->timezone ?? ''));
+
+        return $tz !== '';
+    }
 }

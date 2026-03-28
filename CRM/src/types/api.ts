@@ -3,6 +3,8 @@ export interface StoredUser {
   name: string;
   email: string;
   role: 'admin' | 'client';
+  /** `true` kur backend ka shënuar përfundimin e onboarding (biznes i plotë). */
+  onboarding_completed: boolean;
 }
 
 export interface ApiSuccess<T> {

@@ -1,3 +1,9 @@
+/**
+ * Draft lokal i formës së onboarding në sessionStorage.
+ * Ndihmon përdoruesin të mos humbasë fushat nëse rifreskon faqen / mbyll përkohësisht skedën;
+ * nuk zëvendëson ruajtjen në server. Pas submit të suksesshëm, `useOnboardingSubmit` thërret
+ * `clearDraft()` — mbaje atë rrjedhë.
+ */
 import { useEffect, useRef } from 'react';
 import { DRAFT_KEY, EMPTY_FORM } from '../constants/onboarding';
 import type { OnboardingFormData } from '../types/onboarding';
@@ -23,6 +29,7 @@ export function readDraft(): OnboardingFormData | null {
   }
 }
 
+/** Heq draft-in pas ruajtjes së suksesshme në server (ose kur forma kthehet bosh). */
 export function clearDraft(): void {
   sessionStorage.removeItem(DRAFT_KEY);
 }

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\AiConfigController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\AutomationRuleController;
 use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\BusinessTypeController;
 use App\Http\Controllers\Api\ChannelController;
@@ -10,7 +9,6 @@ use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\ConversationMessageController;
 use App\Http\Controllers\Api\FeedbackController;
-use App\Http\Controllers\Api\KeywordResponseController;
 use App\Http\Controllers\Api\MetaOAuthController;
 use App\Http\Controllers\Api\StatsController;
 use App\Http\Controllers\Api\UserController;
@@ -101,20 +99,6 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::controller(StatsController::class)->prefix('stats')->group(function () {
         Route::get('overview', 'overview');
-    });
-
-    Route::controller(AutomationRuleController::class)->prefix('automation-rules')->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::put('{automationRule}', 'update');
-        Route::delete('{automationRule}', 'destroy');
-    });
-
-    Route::controller(KeywordResponseController::class)->prefix('keyword-responses')->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::put('{keywordResponse}', 'update');
-        Route::delete('{keywordResponse}', 'destroy');
     });
 
     Route::middleware('can:isAdmin')->group(function () {

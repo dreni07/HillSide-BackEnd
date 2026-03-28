@@ -128,8 +128,8 @@ export function Dashboard() {
             <Link to="/app/inbox" className="dashboard-shortcut">
               Inbox
             </Link>
-            <Link to="/app/settings" className="dashboard-shortcut">
-              Cilësime
+            <Link to="/app/ai-config" className="dashboard-shortcut">
+              Konfigurimi AI
             </Link>
           </div>
         </>

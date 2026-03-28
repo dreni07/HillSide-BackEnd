@@ -1,4 +1,5 @@
 export { ProtectedRoute } from './ProtectedRoute';
+export { OnboardingGate } from './OnboardingGate';
 export { AdminRoute } from './AdminRoute';
 export { Layout } from './Layout';
 export { HowWeWork } from './HowWeWork';

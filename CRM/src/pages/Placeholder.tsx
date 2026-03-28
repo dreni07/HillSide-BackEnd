@@ -4,9 +4,6 @@ const PATH_TITLES: Record<string, string> = {
   '/app/profile': 'Profili im',
   '/app/channels': 'Kanale',
   '/app/inbox': 'Inbox',
-  '/app/settings': 'Cilësime',
-  '/app/automation': 'Automatikë',
-  '/app/keyword-responses': 'Përgjigje me fjalëkyç',
   '/app/chatbot': 'Chatbot ON/OFF',
   '/app/manual-reply': 'Përgjigje manuale',
 };

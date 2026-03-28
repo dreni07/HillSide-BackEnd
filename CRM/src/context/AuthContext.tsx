@@ -15,9 +15,11 @@ import {
 import type { StoredUser } from '../services/api';
 import {
   apiAuthRequest,
+  apiRequest,
   clearStoredAuth,
   getStoredToken,
   getStoredUser,
+  normalizeAuthUser,
   setStoredAuth,
 } from '../services/api';
 
@@ -46,12 +48,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = getStoredToken();
-    const user = getStoredUser();
-    if (token && user) {
-      setState({ token, user, loading: false });
-    } else {
-      setState((s) => ({ ...s, loading: false }));
+    if (!token) {
+      setState({ user: null, token: null, loading: false });
+      return;
     }
+
+    const cached = getStoredUser();
+    setState({ user: cached, token, loading: true });
+
+    apiRequest<Record<string, unknown>>('/api/auth/me')
+      .then((raw) => {
+        const user = normalizeAuthUser(raw);
+        setStoredAuth(token, user);
+        setState({ user, token, loading: false });
+      })
+      .catch(() => {
+        setState({ user: cached, token, loading: false });
+      });
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {

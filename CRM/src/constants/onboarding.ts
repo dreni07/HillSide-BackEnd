@@ -29,3 +29,10 @@ export const TIMEZONES = [
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const URL_RE = /^https?:\/\/.+/;
+
+/** Numër minimal shifrash (pas heqjes së jo-shifrave) për telefon biznesi në onboarding. */
+export const PHONE_MIN_DIGITS = 8;
+export const PHONE_MAX_DIGITS = 15;
+
+export const DESCRIPTION_MIN_LEN = 10;
+export const ADDRESS_MIN_LEN = 5;
