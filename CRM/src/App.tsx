@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PasswordResetProvider } from './context/PasswordResetContext';
@@ -31,6 +32,10 @@ import {
   FeedbackOverview,
   OrdersDashboard,
 } from './pages';
+
+const AiConfigPage = lazy(() =>
+  import('./features/ai-config/pages/AiConfigPage').then((m) => ({ default: m.AiConfigPage })),
+);
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
@@ -88,6 +93,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="/app/AI-config" element={<Navigate to="/app/ai-config" replace />} />
       <Route
         path="/app"
         element={
@@ -97,6 +103,16 @@ function AppRoutes() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route
+          path="ai-config"
+          element={
+            <div className="ai-config-layout-shell">
+              <Suspense fallback={<div className="auth-loading">Duke ngarkuar…</div>}>
+                <AiConfigPage />
+              </Suspense>
+            </div>
+          }
+        />
         <Route path="add-products" element={<AddProducts />} />
         <Route path="klientet" element={<AdminRoute><Klientet /></AdminRoute>} />
         <Route path="klientet/:userId/cilesime" element={<AdminRoute><ClientSettings /></AdminRoute>} />

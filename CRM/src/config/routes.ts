@@ -19,6 +19,7 @@ export const navItems: NavItem[] = [
   { path: '/app', label: 'Paneli', role: 'client' },
   { path: '/app/profile', label: 'Profili im', role: 'client' },
   { path: '/app/business', label: 'Biznesi im', role: 'client' },
+  { path: '/app/ai-config', label: 'Konfigurimi AI', role: 'client' },
   { path: '/app/channels', label: 'Kanale', role: 'client' },
   { path: '/app/add-products', label: 'Shto Produkte', role: 'client' },
   { path: '/app/inbox', label: 'Inbox', role: 'client' },

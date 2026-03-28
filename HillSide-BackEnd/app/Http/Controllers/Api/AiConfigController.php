@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AiConfig\SaveAiConfigRequest;
 use App\Http\Requests\AiConfig\StoreAiConfigRequest;
 use App\Models\Business;
 use App\Services\AiConfigService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class AiConfigController extends Controller
 {
@@ -53,18 +56,49 @@ class AiConfigController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
-        $aiConfig = $this->aiConfigService->getConfigForBusiness($business);
+        $config = $this->aiConfigService->getConfigForBusiness($business);
+        $expectedQuestions = $business->aiExpectedQuestions()->orderBy('sort_order')->get();
 
-        if (!$aiConfig) {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'config' => $config,
+                'expected_questions' => $expectedQuestions,
+            ],
+        ]);
+    }
+
+    public function save(SaveAiConfigRequest $request, Business $business): JsonResponse
+    {
+        if ($business->user_id !== $request->user()->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'No AI configuration found for this business.',
-            ], Response::HTTP_NOT_FOUND);
+                'message' => 'You do not own this business.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        try {
+            $result = $this->aiConfigService->saveFullConfiguration($business, $request->validated());
+        } catch (Throwable $e) {
+            Log::error('AI config save failed', [
+                'business_id' => $business->id,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not save AI configuration. Please try again.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $aiConfig,
+            'message' => 'AI configuration saved successfully.',
+            'data' => [
+                'config' => $result['config'],
+                'expected_questions' => $result['expected_questions'],
+            ],
         ]);
     }
 }

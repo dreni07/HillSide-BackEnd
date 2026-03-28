@@ -86,4 +86,9 @@ class Business extends Model
     {
         return $this->hasMany(Service::class);
     }
+
+    public function aiExpectedQuestions(): HasMany
+    {
+        return $this->hasMany(AiExpectedQuestion::class)->orderBy('sort_order');
+    }
 }
