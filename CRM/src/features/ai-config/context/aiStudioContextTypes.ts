@@ -1,4 +1,5 @@
 import type {
+  AiBehaviourDraft,
   AiPersonalityDraft,
   AiRestrictionsDraft,
   AiSalesmanDraft,
@@ -43,4 +44,9 @@ export interface AiStudioContextValue {
   /** Persist full draft to API */
   isSaving: boolean;
   saveToServer: () => Promise<SaveToServerResult>;
+
+  behaviourDraft: AiBehaviourDraft;
+  /** Incremented when server data is applied so the flow canvas re-mounts with saved nodes/edges. */
+  flowCanvasKey: number;
+  registerFlowSnapshotGetter: (getter: (() => string | null) | null) => void;
 }

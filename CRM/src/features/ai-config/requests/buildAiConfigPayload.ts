@@ -1,4 +1,5 @@
 import type {
+  AiBehaviourDraft,
   AiPersonalityDraft,
   AiRestrictionsDraft,
   AiSalesmanDraft,
@@ -31,6 +32,11 @@ export interface SaveAiConfigPayload {
   };
   expected_questions: { question: string; answer: string }[];
   is_active: boolean;
+  behaviour: {
+    orchestration_title: string;
+    orchestration_subtitle: string | null;
+    flow_graph_json: string | null;
+  };
 }
 
 export function buildSaveAiConfigPayload(
@@ -38,6 +44,9 @@ export function buildSaveAiConfigPayload(
   restrictions: AiRestrictionsDraft,
   salesman: AiSalesmanDraft,
   expectedQuestions: ExpectedQuestionDraft[],
+  behaviourDraft: AiBehaviourDraft,
+  /** Live React Flow snapshot; omit or pass `undefined` if the canvas is not mounted. */
+  flowGraphJsonFromCanvas?: string | null,
 ): SaveAiConfigPayload {
   const pairs = expectedQuestions
     .map((row) => ({
@@ -45,6 +54,9 @@ export function buildSaveAiConfigPayload(
       answer: row.answer.trim(),
     }))
     .filter((row) => row.question.length > 0 && row.answer.length > 0);
+
+  const flow_graph_json =
+    flowGraphJsonFromCanvas != null ? flowGraphJsonFromCanvas : behaviourDraft.flow_graph_json;
 
   return {
     personality: {
@@ -72,5 +84,11 @@ export function buildSaveAiConfigPayload(
     },
     expected_questions: pairs,
     is_active: true,
+    behaviour: {
+      orchestration_title:
+        behaviourDraft.orchestration_title.trim() || 'Agent Orchestration Studio',
+      orchestration_subtitle: behaviourDraft.orchestration_subtitle?.trim() || null,
+      flow_graph_json,
+    },
   };
 }

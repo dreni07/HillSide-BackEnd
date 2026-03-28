@@ -63,3 +63,10 @@ export interface StudioInspectorHeaderModel {
   subtitle: string;
   category: StudioPaletteCategory;
 }
+
+/** `ai_behaviours` — studio shell + flow persistence (subset used by the CRM UI). */
+export interface AiBehaviourDraft {
+  orchestration_title: string;
+  orchestration_subtitle: string | null;
+  flow_graph_json: string | null;
+}

@@ -5,6 +5,7 @@ import {
 } from '../data/aiSchemaConstants';
 import type { ApiAiConfigShowData, ApiExpectedQuestionRow } from '../types/apiAiConfig';
 import type {
+  AiBehaviourDraft,
   AiPersonalityDraft,
   AiRestrictionsDraft,
   AiSalesmanDraft,
@@ -29,11 +30,27 @@ function coerceApproach(v: string): AiSalesmanDraft['sales_approach'] {
     : 'consultative';
 }
 
+function mapBehaviourDraft(b: ApiAiConfigShowData['behaviour']): AiBehaviourDraft {
+  if (!b) {
+    return {
+      orchestration_title: 'Agent Orchestration Studio',
+      orchestration_subtitle: 'Configure AI for your business',
+      flow_graph_json: null,
+    };
+  }
+  return {
+    orchestration_title: (b.orchestration_title && b.orchestration_title.trim()) || 'Agent Orchestration Studio',
+    orchestration_subtitle: b.orchestration_subtitle ?? null,
+    flow_graph_json: b.flow_graph_json ?? null,
+  };
+}
+
 export function mapShowDataToDrafts(data: ApiAiConfigShowData): {
   personality: AiPersonalityDraft;
   restrictions: AiRestrictionsDraft;
   salesman: AiSalesmanDraft;
   expectedQuestions: ExpectedQuestionDraft[];
+  behaviour: AiBehaviourDraft;
 } {
   const config = data.config;
   if (!config) {
@@ -64,6 +81,7 @@ export function mapShowDataToDrafts(data: ApiAiConfigShowData): {
       expectedQuestions: Array.isArray(data.expected_questions)
         ? mapExpectedQuestions(data.expected_questions)
         : [],
+      behaviour: mapBehaviourDraft(data.behaviour ?? null),
     };
   }
 
@@ -98,6 +116,7 @@ export function mapShowDataToDrafts(data: ApiAiConfigShowData): {
     expectedQuestions: Array.isArray(data.expected_questions)
       ? mapExpectedQuestions(data.expected_questions)
       : [],
+    behaviour: mapBehaviourDraft(data.behaviour ?? null),
   };
 }
 
