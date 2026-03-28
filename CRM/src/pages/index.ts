@@ -23,6 +23,5 @@ export { Profile } from './Profile';
 export { Business } from './Business';
 export { Statistics } from './Statistics';
 export { FeedbackOverview } from './FeedbackOverview';
-export { AddProducts } from './AddProducts';
 export { Placeholder } from './Placeholder';
 export { OrdersDashboard } from './OrdersDashboard';

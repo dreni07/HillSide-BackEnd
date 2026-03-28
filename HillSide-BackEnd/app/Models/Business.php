@@ -77,11 +77,6 @@ class Business extends Model
         );
     }
 
-    public function products(): HasMany
-    {
-        return $this->hasMany(Product::class);
-    }
-
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);
@@ -90,6 +85,11 @@ class Business extends Model
     public function aiExpectedQuestions(): HasMany
     {
         return $this->hasMany(AiExpectedQuestion::class)->orderBy('sort_order');
+    }
+
+    public function extractedProductItems(): HasMany
+    {
+        return $this->hasMany(ExtractedProductItem::class);
     }
 
     /**
