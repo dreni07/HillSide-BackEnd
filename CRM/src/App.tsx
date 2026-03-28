@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PasswordResetProvider } from './context/PasswordResetContext';
-import { Layout, ProtectedRoute, AdminRoute } from './components';
+import { Layout, ProtectedRoute, AdminRoute, OnboardingGate } from './components';
 import {
   Login,
   Register,
@@ -23,9 +23,6 @@ import {
   InboxThread,
   Contacts,
   ContactDetail,
-  Automation,
-  KeywordResponses,
-  Settings,
   Profile,
   Business,
   Statistics,
@@ -98,7 +95,9 @@ function AppRoutes() {
         path="/app"
         element={
           <ProtectedRoute>
-            <Layout />
+            <OnboardingGate>
+              <Layout />
+            </OnboardingGate>
           </ProtectedRoute>
         }
       >
@@ -127,9 +126,9 @@ function AppRoutes() {
         <Route path="orders" element={<OrdersDashboard />} />
         <Route path="contacts" element={<Contacts />} />
         <Route path="contacts/:contactId" element={<ContactDetail />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="automation" element={<Automation />} />
-        <Route path="keyword-responses" element={<KeywordResponses />} />
+        <Route path="settings" element={<Navigate to="/app/ai-config" replace />} />
+        <Route path="automation" element={<Navigate to="/app/ai-config" replace />} />
+        <Route path="keyword-responses" element={<Navigate to="/app/ai-config" replace />} />
         <Route path="chatbot" element={<Navigate to="/app/channels" replace />} />
         <Route path="manual-reply" element={<Navigate to="/app/inbox" replace />} />
       </Route>

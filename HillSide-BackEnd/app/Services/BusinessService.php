@@ -29,8 +29,10 @@ class BusinessService
     public function updateBusiness(Business $business, array $data): Business
     {
         $business->update($data);
+        $business->refresh();
+        $this->syncOnboardingCompletedForUser($business->user);
 
-        return $business->refresh();
+        return $business;
     }
 
     public function assignBusinessType(Business $business, int $businessTypeId): Business
@@ -41,6 +43,27 @@ class BusinessService
 
         $business->update(['business_type_id' => $businessType->id]);
 
-        return $business->load('businessType');
+        $business->load('businessType');
+        $this->syncOnboardingCompletedForUser($business->user);
+
+        return $business;
+    }
+
+    public function syncOnboardingCompletedForUser(User $user): void
+    {
+        if ($user->is_admin) {
+            return;
+        }
+
+        $complete = $user->businesses()->get()->contains(
+            fn (Business $b) => $b->isProfileCompleteForOnboarding()
+        );
+
+        if ((bool) $user->onboarding_completed === $complete) {
+            return;
+        }
+
+        $user->onboarding_completed = $complete;
+        $user->save();
     }
 }

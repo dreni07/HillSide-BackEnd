@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getStoredUser } from '../services/api';
-import { GoogleContinueButton } from '../components/auth/GoogleContinueButton';
 import { AuthCard, AuthPage } from '../components/auth/AuthLayout';
 
 export function Login() {
@@ -12,7 +11,6 @@ export function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [oauthMessage, setOauthMessage] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -97,18 +95,6 @@ export function Login() {
             />
             Më mbaj të kyçur
           </label>
-
-          <div className="auth-divider">ose</div>
-
-          <GoogleContinueButton
-            disabled={loading}
-            onClick={() => {
-              setOauthMessage('Demo: vazhdo me Google (UI vetëm). Integrimi real do të shtohet më vonë.');
-            }}
-            label="Continue with Google"
-          />
-
-          {oauthMessage && <div className="auth-hint" style={{ marginTop: '0.75rem' }}>{oauthMessage}</div>}
         </form>
         <p className="auth-footer">
           <Link to="/forgot-password">Keni harruar fjalëkalimin?</Link>

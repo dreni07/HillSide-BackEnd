@@ -33,14 +33,19 @@ export function CompanyInfoFields() {
       </label>
 
       <label>
-        Çfarë bën kompania juaj?
+        Çfarë bën kompania juaj? <span className="required" aria-hidden="true">*</span>
         <textarea
           value={formData.description}
           onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'description', value: e.target.value })}
+          onBlur={() => handleBlur('description')}
           disabled={isSubmitting}
+          required
           rows={3}
           placeholder="P.sh. Shesim produkte kozmetike online në Shqipëri…"
         />
+        {fieldErrors.description && (
+          <span className="field-error" role="status">{fieldErrors.description}</span>
+        )}
       </label>
     </>
   );

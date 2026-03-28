@@ -25,11 +25,26 @@ export function getStoredToken(): string | null {
   return localStorage.getItem(STORAGE_KEY_TOKEN);
 }
 
+/** Përshtat përgjigjen e Laravel (`is_admin`, etj.) me formën e CRM-së. */
+export function normalizeAuthUser(raw: Record<string, unknown>): StoredUser {
+  const isAdmin = Boolean(raw.is_admin);
+  const oc = raw.onboarding_completed;
+  const completed = oc === true || oc === 1 || oc === '1';
+  return {
+    id: String(raw.id ?? ''),
+    name: String(raw.name ?? ''),
+    email: String(raw.email ?? ''),
+    role: isAdmin ? 'admin' : 'client',
+    onboarding_completed: completed,
+  };
+}
+
 export function getStoredUser(): StoredUser | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_USER);
     if (!raw) return null;
-    return JSON.parse(raw) as StoredUser;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return normalizeAuthUser(parsed);
   } catch {
     return null;
   }
@@ -185,7 +200,8 @@ export async function apiAuthRequest<T = AuthResponse['data']>(
 
     if (typeof raw === 'object' && raw !== null && 'success' in raw && (raw as AuthResponse).success === true) {
       const auth = raw as AuthResponse;
-      return { data: auth.data as T, token: auth.token };
+      const payload = auth.data as unknown as Record<string, unknown>;
+      return { data: normalizeAuthUser(payload) as T, token: auth.token };
     }
 
     const msg =
