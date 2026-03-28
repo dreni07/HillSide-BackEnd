@@ -14,7 +14,6 @@ import {
   Privacy,
   Terms,
   Dashboard,
-  AddProducts,
   Klientet,
   ClientSettings,
   Channels,
@@ -32,6 +31,9 @@ import {
 
 const AiConfigPage = lazy(() =>
   import('./features/ai-config/pages/AiConfigPage').then((m) => ({ default: m.AiConfigPage })),
+);
+const ProductUploadPage = lazy(() =>
+  import('./features/product-upload/pages/ProductUploadPage').then((m) => ({ default: m.ProductUploadPage })),
 );
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -112,7 +114,16 @@ function AppRoutes() {
             </div>
           }
         />
-        <Route path="add-products" element={<AddProducts />} />
+        <Route
+          path="product-upload"
+          element={
+            <div className="ai-config-layout-shell">
+              <Suspense fallback={<div className="auth-loading">Duke ngarkuar…</div>}>
+                <ProductUploadPage />
+              </Suspense>
+            </div>
+          }
+        />
         <Route path="klientet" element={<AdminRoute><Klientet /></AdminRoute>} />
         <Route path="klientet/:userId/cilesime" element={<AdminRoute><ClientSettings /></AdminRoute>} />
         <Route path="profile" element={<Profile />} />

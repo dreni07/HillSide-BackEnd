@@ -47,7 +47,7 @@ return [
          * Must match exactly a "Valid OAuth Redirect URI" in the Meta app (Facebook Login).
          * Override if the API is served on a different public URL than APP_URL.
          */
-        'redirect_uri' => env('META_REDIRECT_URI') ?: rtrim((string) env('APP_URL', 'http://localhost'), '/') . '/api/oauth/meta/callback',
+        'redirect_uri' => env('META_REDIRECT_URI') ?: rtrim((string) env('APP_URL', 'http://localhost'), '/').'/api/oauth/meta/callback',
         'frontend_url' => rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/'),
         'graph_base_url' => rtrim((string) (env('META_GRAPH_BASE_URL') ?: 'https://graph.facebook.com/v21.0'), '/'),
         /** Seconds to keep OAuth session data for selection / connect endpoints */
@@ -61,6 +61,15 @@ return [
                 'pages_show_list,pages_read_engagement,pages_manage_metadata,pages_messaging,instagram_basic,instagram_manage_messages'
             ))
         ))),
+    ],
+
+    /*
+     * Tesseract OCR: instaloni binarin dhe paketat e gjuhës (tesseract --list-langs).
+     * Në Windows vendosni rrugën e plotë te TESSERACT_EXECUTABLE nëse nuk është në PATH.
+     */
+    'tesseract' => [
+        'executable' => env('TESSERACT_EXECUTABLE', 'tesseract'),
+        'languages' => env('TESSERACT_LANGUAGES', 'eng'),
     ],
 
 ];

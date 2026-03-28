@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\ConversationMessageController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\MetaOAuthController;
+use App\Http\Controllers\Api\ProductUploadController;
 use App\Http\Controllers\Api\StatsController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +66,12 @@ Route::middleware('jwt.auth')->group(function () {
         Route::post('ai-config', 'store');
         Route::post('ai-config/save', 'save');
         Route::get('ai-config', 'show');
+    });
+
+    Route::controller(ProductUploadController::class)->prefix('businesses/{business}/product-uploads')->group(function () {
+        Route::post('document', 'uploadDocument');
+        Route::post('image', 'uploadImage');
+        Route::post('manual', 'storeManual');
     });
 
     Route::controller(ChannelController::class)->prefix('channels')->group(function () {

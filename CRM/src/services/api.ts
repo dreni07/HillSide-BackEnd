@@ -83,7 +83,8 @@ function handleUnauthorized(): never {
   throw new Error('Session e skaduar. Ju ridrejtoheni te faqja e hyrjes.');
 }
 
-function extractValidationMessage(data: unknown): string | null {
+/** Përdoret edhe nga modulët që nuk kalojnë nëpër `apiRequest` (p.sh. FormData). */
+export function extractValidationMessage(data: unknown): string | null {
   if (!data || typeof data !== 'object') return null;
   const anyData = data as { message?: string; errors?: Record<string, string[] | string> };
   if (anyData.errors && typeof anyData.errors === 'object') {
@@ -177,6 +178,75 @@ export async function apiRequest<T>(
     }
     throw new Error('Gabim në komunikim me serverin. Kontrolloni lidhjen dhe provoni përsëri.');
   }
+}
+
+/**
+ * POST multipart/form-data me JWT (pa Content-Type manual — boundary nga shfletuesi).
+ * Përgjigjja e pritur: `{ success: true, data: T }` si rrugët e tjera të API-së.
+ */
+export async function apiPostFormData<T>(path: string, formData: FormData): Promise<T> {
+  const token = getStoredToken();
+  if (!token) {
+    handleUnauthorized();
+  }
+
+  const url = path.startsWith('http') ? path : `${env.apiUrl}${path}`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+  } catch {
+    throw new Error('Gabim në komunikim me serverin. Kontrolloni lidhjen dhe provoni përsëri.');
+  }
+
+  const rawText = await res.text();
+  let body: unknown = {};
+  try {
+    body = rawText ? JSON.parse(rawText) : {};
+  } catch {
+    body = { message: rawText || res.statusText };
+  }
+
+  if (res.status === 401) {
+    handleUnauthorized();
+  }
+
+  if (
+    res.ok &&
+    typeof body === 'object' &&
+    body !== null &&
+    'success' in body &&
+    (body as ApiResponse<T>).success === true
+  ) {
+    return (body as ApiSuccess<T>).data;
+  }
+
+  const errMsg =
+    extractValidationMessage(body) ??
+    (res.status === 403
+      ? 'Nuk keni qasje.'
+      : res.status === 404
+        ? 'Nuk u gjet.'
+        : res.status === 422
+          ? 'Të dhënat e futura nuk janë të vlefshme.'
+          : res.status >= 500
+            ? 'Gabim në server. Provoni përsëri më vonë.'
+            : (typeof body === 'object' &&
+                body !== null &&
+                'message' in body &&
+                typeof (body as ApiError).message === 'string' &&
+                (body as ApiError).message) ||
+              res.statusText ||
+              'Gabim në server.');
+
+  throw new Error(errMsg);
 }
 
 export async function apiAuthRequest<T = AuthResponse['data']>(
