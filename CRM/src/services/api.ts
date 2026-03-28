@@ -97,6 +97,36 @@ export function extractValidationMessage(data: unknown): string | null {
   return null;
 }
 
+/** Heq HTML nga mesazhet e gabimit (kur PHP shton Notice para JSON). */
+export function sanitizeApiUserMessage(raw: string): string {
+  return raw
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
+/** Parse JSON; nëse përpara përgjigjes ka HTML (Notice), përpiqet të gjejë objektin `{"success":...}`. */
+function parseJsonBodyLenient(rawText: string): { ok: true; value: unknown } | { ok: false } {
+  const t = rawText.trim();
+  if (!t) return { ok: true, value: {} };
+  try {
+    return { ok: true, value: JSON.parse(t) };
+  } catch {
+    const idx = t.indexOf('{"success"');
+    if (idx !== -1) {
+      try {
+        return { ok: true, value: JSON.parse(t.slice(idx)) };
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  return { ok: false };
+}
 
 export async function apiRequest<T>(
   path: string,
@@ -207,12 +237,8 @@ export async function apiPostFormData<T>(path: string, formData: FormData): Prom
   }
 
   const rawText = await res.text();
-  let body: unknown = {};
-  try {
-    body = rawText ? JSON.parse(rawText) : {};
-  } catch {
-    body = { message: rawText || res.statusText };
-  }
+  const parsed = parseJsonBodyLenient(rawText);
+  const body: unknown = parsed.ok ? parsed.value : {};
 
   if (res.status === 401) {
     handleUnauthorized();
@@ -220,6 +246,7 @@ export async function apiPostFormData<T>(path: string, formData: FormData): Prom
 
   if (
     res.ok &&
+    parsed.ok &&
     typeof body === 'object' &&
     body !== null &&
     'success' in body &&
@@ -228,23 +255,36 @@ export async function apiPostFormData<T>(path: string, formData: FormData): Prom
     return (body as ApiSuccess<T>).data;
   }
 
-  const errMsg =
+  let errMsg =
     extractValidationMessage(body) ??
-    (res.status === 403
-      ? 'Nuk keni qasje.'
-      : res.status === 404
-        ? 'Nuk u gjet.'
-        : res.status === 422
-          ? 'Të dhënat e futura nuk janë të vlefshme.'
-          : res.status >= 500
-            ? 'Gabim në server. Provoni përsëri më vonë.'
-            : (typeof body === 'object' &&
-                body !== null &&
-                'message' in body &&
-                typeof (body as ApiError).message === 'string' &&
-                (body as ApiError).message) ||
-              res.statusText ||
-              'Gabim në server.');
+    ((typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      typeof (body as ApiError).message === 'string' &&
+      (body as ApiError).message) ||
+      null);
+
+  if (!errMsg) {
+    errMsg =
+      res.status === 403
+        ? 'Nuk keni qasje.'
+        : res.status === 404
+          ? 'Nuk u gjet.'
+          : res.status === 422
+            ? 'Të dhënat e futura nuk janë të vlefshme.'
+            : res.status >= 500
+              ? 'Gabim në server. Provoni përsëri më vonë.'
+              : res.statusText || 'Gabim në server.';
+  }
+
+  if (!parsed.ok && rawText.trim()) {
+    const cleaned = sanitizeApiUserMessage(rawText);
+    if (cleaned.length > 0) {
+      errMsg = cleaned.length > 800 ? `${cleaned.slice(0, 800)}…` : cleaned;
+    }
+  } else if (errMsg) {
+    errMsg = sanitizeApiUserMessage(errMsg);
+  }
 
   throw new Error(errMsg);
 }
