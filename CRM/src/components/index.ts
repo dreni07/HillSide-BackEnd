@@ -6,3 +6,5 @@ export { MessageBubble } from './MessageBubble';
 export { BubbleCursor, type BubbleCursorPosition, type BubbleCursorProps } from './BubbleCursor';
 export { MouseGlow } from './MouseGlow';
 export { ManageOrdersSection } from './ManageOrdersSection';
+export { LoadingOverlay } from './ui/LoadingOverlay';
+export { AlertModal, type AlertModalProps, type AlertModalVariant } from './ui/AlertModal';

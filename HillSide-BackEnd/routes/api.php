@@ -59,6 +59,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::controller(AiConfigController::class)->prefix('businesses/{business}')->group(function () {
         Route::post('ai-config', 'store');
+        Route::post('ai-config/save', 'save');
         Route::get('ai-config', 'show');
     });
 
