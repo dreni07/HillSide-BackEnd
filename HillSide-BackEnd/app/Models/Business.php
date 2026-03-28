@@ -87,6 +87,11 @@ class Business extends Model
         return $this->hasMany(AiExpectedQuestion::class)->orderBy('sort_order');
     }
 
+    public function aiBehaviour(): HasOne
+    {
+        return $this->hasOne(AiBehaviour::class);
+    }
+
     public function extractedProductItems(): HasMany
     {
         return $this->hasMany(ExtractedProductItem::class);

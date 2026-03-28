@@ -58,12 +58,14 @@ class AiConfigController extends Controller
 
         $config = $this->aiConfigService->getConfigForBusiness($business);
         $expectedQuestions = $business->aiExpectedQuestions()->orderBy('sort_order')->get();
+        $behaviour = $business->aiBehaviour()->first();
 
         return response()->json([
             'success' => true,
             'data' => [
                 'config' => $config,
                 'expected_questions' => $expectedQuestions,
+                'behaviour' => $behaviour,
             ],
         ]);
     }
@@ -98,6 +100,7 @@ class AiConfigController extends Controller
             'data' => [
                 'config' => $result['config'],
                 'expected_questions' => $result['expected_questions'],
+                'behaviour' => $result['behaviour'],
             ],
         ]);
     }

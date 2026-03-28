@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AiBehaviour;
 use App\Models\AiConfig;
 use App\Models\AiExpectedQuestion;
 use App\Models\AiPersonality;
@@ -48,7 +49,7 @@ class AiConfigService
      * Create or update AI personality, restrictions, salesman, and sync expected questions for the business.
      *
      * @param  array<string, mixed>  $data  Validated payload from SaveAiConfigRequest
-     * @return array{config: AiConfig, expected_questions: \Illuminate\Database\Eloquent\Collection<int, AiExpectedQuestion>}
+     * @return array{config: AiConfig, expected_questions: \Illuminate\Database\Eloquent\Collection<int, AiExpectedQuestion>, behaviour: AiBehaviour|null}
      *
      * @throws Throwable
      */
@@ -81,13 +82,41 @@ class AiConfigService
 
             $this->syncExpectedQuestions($business, $data['expected_questions'] ?? []);
 
+            $behaviour = null;
+            if (array_key_exists('behaviour', $data) && is_array($data['behaviour'])) {
+                $behaviour = $this->upsertBehaviour($business, $data['behaviour']);
+            }
+
             $config->load(['personality', 'restrictions', 'salesman']);
 
             return [
                 'config' => $config,
                 'expected_questions' => $business->aiExpectedQuestions()->orderBy('sort_order')->get(),
+                'behaviour' => $behaviour ?? $business->aiBehaviour()->first(),
             ];
         });
+    }
+
+    /**
+     * Partial update: only keys present in the request overwrite existing columns.
+     *
+     * @param  array<string, mixed>  $behaviour
+     */
+    private function upsertBehaviour(Business $business, array $behaviour): AiBehaviour
+    {
+        $model = AiBehaviour::firstOrNew(['business_id' => $business->id]);
+
+        foreach ((new AiBehaviour)->getFillable() as $key) {
+            if ($key === 'business_id' || ! array_key_exists($key, $behaviour)) {
+                continue;
+            }
+            $model->{$key} = $behaviour[$key];
+        }
+
+        $model->business_id = $business->id;
+        $model->save();
+
+        return $model->fresh();
     }
 
     /**

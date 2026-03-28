@@ -4,17 +4,19 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
-import { apiRequest, type Business } from '../../../services/api';
 import { newClientId } from '../data/aiFormUtils';
 import { flowNodeToDomainId } from '../data/flowNodeMap';
 import { buildSaveAiConfigPayload } from '../requests/buildAiConfigPayload';
+import { fetchAiConfigShow, fetchAuthenticatedBusiness, saveAiConfig } from '../requests/aiConfigRequests';
 import { getDomainItem } from '../data/studioPalette';
-import type { ApiAiConfigSaveData, ApiAiConfigShowData, SaveToServerResult } from '../types/apiAiConfig';
+import type { ApiAiConfigShowData, SaveToServerResult } from '../types/apiAiConfig';
 import { mapShowDataToDrafts } from '../utils/mapApiToDrafts';
 import type {
+  AiBehaviourDraft,
   AiPersonalityDraft,
   AiRestrictionsDraft,
   AiSalesmanDraft,
@@ -52,6 +54,12 @@ const defaultSalesman: AiSalesmanDraft = {
   objection_handling: '',
 };
 
+const defaultBehaviour: AiBehaviourDraft = {
+  orchestration_title: 'Agent Orchestration Studio',
+  orchestration_subtitle: 'Configure AI for your business',
+  flow_graph_json: null,
+};
+
 function resolveDomainFromSelection(selection: StudioSelection): ConfigDomainId | null {
   if (!selection) return null;
   if (selection.source === 'palette') return selection.itemId;
@@ -59,8 +67,6 @@ function resolveDomainFromSelection(selection: StudioSelection): ConfigDomainId 
 }
 
 export function AiStudioProvider({ children }: { children: ReactNode }) {
-  const [orchestrationTitle] = useState('Agent Orchestration Studio');
-  const [orchestrationSubtitle] = useState('Configure AI for your business');
   const [librarySearch, setLibrarySearch] = useState('');
   const [selection, setSelection] = useState<StudioSelection>({
     source: 'palette',
@@ -71,10 +77,17 @@ export function AiStudioProvider({ children }: { children: ReactNode }) {
   const [restrictions, setRestrictions] = useState<AiRestrictionsDraft>(defaultRestrictions);
   const [salesman, setSalesman] = useState<AiSalesmanDraft>(defaultSalesman);
   const [expectedQuestions, setExpectedQuestions] = useState<ExpectedQuestionDraft[]>([]);
+  const [behaviourDraft, setBehaviourDraft] = useState<AiBehaviourDraft>(defaultBehaviour);
+  const [flowCanvasKey, setFlowCanvasKey] = useState(0);
 
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const flowSnapshotGetterRef = useRef<(() => string | null) | null>(null);
+  const registerFlowSnapshotGetter = useCallback((getter: (() => string | null) | null) => {
+    flowSnapshotGetterRef.current = getter;
+  }, []);
 
   const hydrateDraft = useCallback((payload: ApiAiConfigShowData) => {
     const mapped = mapShowDataToDrafts(payload);
@@ -82,20 +95,24 @@ export function AiStudioProvider({ children }: { children: ReactNode }) {
     setRestrictions(mapped.restrictions);
     setSalesman(mapped.salesman);
     setExpectedQuestions(mapped.expectedQuestions);
+    setBehaviourDraft(mapped.behaviour);
+    setFlowCanvasKey((k) => k + 1);
   }, []);
 
   const reloadFromServer = useCallback(async () => {
     setBootstrapError(null);
     setIsBootstrapping(true);
     try {
-      const business = await apiRequest<Business>('/api/business/me');
-      const data = await apiRequest<ApiAiConfigShowData>(`/api/businesses/${business.id}/ai-config`);
+      const business = await fetchAuthenticatedBusiness();
+      const data = await fetchAiConfigShow(business.id);
       hydrateDraft(data);
     } catch (e) {
       setPersonality(defaultPersonality);
       setRestrictions(defaultRestrictions);
       setSalesman(defaultSalesman);
       setExpectedQuestions([]);
+      setBehaviourDraft(defaultBehaviour);
+      setFlowCanvasKey((k) => k + 1);
       const msg =
         e instanceof Error
           ? e.message
@@ -157,18 +174,21 @@ export function AiStudioProvider({ children }: { children: ReactNode }) {
   const saveToServer = useCallback(async (): Promise<SaveToServerResult> => {
     setIsSaving(true);
     try {
-      const business = await apiRequest<Business>('/api/business/me');
-      const payload = buildSaveAiConfigPayload(personality, restrictions, salesman, expectedQuestions);
-      const saved = await apiRequest<ApiAiConfigSaveData>(
-        `/api/businesses/${business.id}/ai-config/save`,
-        {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        },
+      const business = await fetchAuthenticatedBusiness();
+      const flowSnap = flowSnapshotGetterRef.current?.();
+      const payload = buildSaveAiConfigPayload(
+        personality,
+        restrictions,
+        salesman,
+        expectedQuestions,
+        behaviourDraft,
+        flowSnap,
       );
+      const saved = await saveAiConfig(business.id, payload);
       hydrateDraft({
         config: saved.config,
         expected_questions: saved.expected_questions,
+        behaviour: saved.behaviour ?? null,
       });
       return { ok: true, message: 'Konfigurimi i AI u ruajt me sukses.' };
     } catch (e) {
@@ -182,7 +202,7 @@ export function AiStudioProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }, [personality, restrictions, salesman, expectedQuestions, hydrateDraft]);
+  }, [personality, restrictions, salesman, expectedQuestions, behaviourDraft, hydrateDraft]);
 
   const selectedDomainId = useMemo(() => resolveDomainFromSelection(selection), [selection]);
 
@@ -199,8 +219,8 @@ export function AiStudioProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AiStudioContextValue>(
     () => ({
-      orchestrationTitle,
-      orchestrationSubtitle,
+      orchestrationTitle: behaviourDraft.orchestration_title,
+      orchestrationSubtitle: behaviourDraft.orchestration_subtitle ?? '',
       librarySearch,
       setLibrarySearch,
       selection,
@@ -224,10 +244,12 @@ export function AiStudioProvider({ children }: { children: ReactNode }) {
       reloadFromServer,
       isSaving,
       saveToServer,
+      behaviourDraft,
+      flowCanvasKey,
+      registerFlowSnapshotGetter,
     }),
     [
-      orchestrationTitle,
-      orchestrationSubtitle,
+      behaviourDraft,
       librarySearch,
       selection,
       selectFromPalette,
@@ -250,6 +272,8 @@ export function AiStudioProvider({ children }: { children: ReactNode }) {
       reloadFromServer,
       isSaving,
       saveToServer,
+      flowCanvasKey,
+      registerFlowSnapshotGetter,
     ],
   );
 

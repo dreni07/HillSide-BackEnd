@@ -49,15 +49,43 @@ export interface ApiExpectedQuestionRow {
   sort_order: number;
 }
 
+/** `ai_behaviours` row — orchestration studio + flow snapshot. */
+export interface ApiAiBehaviour {
+  id: number;
+  business_id: number;
+  orchestration_title: string;
+  orchestration_subtitle: string | null;
+  insight_banner_message: string | null;
+  active_workflow_tab: string | null;
+  flow_graph_json: string | null;
+  selected_palette_item_id: string | null;
+  inspector_detail_json: Record<string, unknown> | null;
+  personality_summary: string | null;
+  customer_restriction_rules: string | null;
+  sales_objectives: string | null;
+  voice_tone: string | null;
+  implementation_method: string | null;
+  scenario_flags_json: unknown[] | Record<string, unknown> | null;
+  goals_maintain_json: unknown[] | Record<string, unknown> | null;
+  goals_minimize_json: unknown[] | Record<string, unknown> | null;
+  constraints_notes: string | null;
+  perception_modules_snapshot_json: unknown[] | Record<string, unknown> | null;
+  selector_modules_snapshot_json: unknown[] | Record<string, unknown> | null;
+  skill_modules_snapshot_json: unknown[] | Record<string, unknown> | null;
+  is_published: boolean;
+}
+
 export interface ApiAiConfigShowData {
   config: ApiAiConfigRow | null;
   expected_questions: ApiExpectedQuestionRow[];
+  behaviour: ApiAiBehaviour | null;
 }
 
 /** Response body from POST …/ai-config/save */
 export interface ApiAiConfigSaveData {
   config: ApiAiConfigRow;
   expected_questions: ApiExpectedQuestionRow[];
+  behaviour: ApiAiBehaviour | null;
 }
 
 export type SaveToServerResult =

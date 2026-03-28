@@ -78,6 +78,28 @@ class SaveAiConfigRequest extends FormRequest
             'expected_questions.*.answer' => ['required', 'string', 'max:10000'],
 
             'is_active' => ['sometimes', 'boolean'],
+
+            'behaviour' => ['nullable', 'array'],
+            'behaviour.orchestration_title' => ['sometimes', 'string', 'max:255'],
+            'behaviour.orchestration_subtitle' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'behaviour.insight_banner_message' => ['sometimes', 'nullable', 'string', 'max:5000'],
+            'behaviour.active_workflow_tab' => ['sometimes', 'nullable', 'string', 'max:64'],
+            'behaviour.flow_graph_json' => ['sometimes', 'nullable', 'string', 'max:16777215'],
+            'behaviour.selected_palette_item_id' => ['sometimes', 'nullable', 'string', 'max:128'],
+            'behaviour.inspector_detail_json' => ['sometimes', 'nullable', 'array'],
+            'behaviour.personality_summary' => ['sometimes', 'nullable', 'string', 'max:65535'],
+            'behaviour.customer_restriction_rules' => ['sometimes', 'nullable', 'string', 'max:65535'],
+            'behaviour.sales_objectives' => ['sometimes', 'nullable', 'string', 'max:65535'],
+            'behaviour.voice_tone' => ['sometimes', 'nullable', 'string', 'max:64'],
+            'behaviour.implementation_method' => ['sometimes', 'nullable', 'string', 'max:32'],
+            'behaviour.scenario_flags_json' => ['sometimes', 'nullable', 'array'],
+            'behaviour.goals_maintain_json' => ['sometimes', 'nullable', 'array'],
+            'behaviour.goals_minimize_json' => ['sometimes', 'nullable', 'array'],
+            'behaviour.constraints_notes' => ['sometimes', 'nullable', 'string', 'max:65535'],
+            'behaviour.perception_modules_snapshot_json' => ['sometimes', 'nullable', 'array'],
+            'behaviour.selector_modules_snapshot_json' => ['sometimes', 'nullable', 'array'],
+            'behaviour.skill_modules_snapshot_json' => ['sometimes', 'nullable', 'array'],
+            'behaviour.is_published' => ['sometimes', 'boolean'],
         ];
     }
 
