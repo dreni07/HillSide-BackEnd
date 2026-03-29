@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiRequest } from '../services/api';
-import type { ConversationWithMessages, Message } from '../types/inbox';
+import type { ConversationContact, ConversationWithMessages, Message } from '../types/inbox';
 import { CHANNEL_PLATFORM_LABELS } from '../types/channel';
 import type { ChannelPlatform } from '../types/channel';
 
@@ -45,6 +45,20 @@ function getSentimentBadgeClass(
 ) {
   if (!label) return 'sentiment-badge sentiment-badge--none';
   return `sentiment-badge sentiment-badge--${label}`;
+}
+
+function threadPeerLabel(conv: ConversationWithMessages['conversation']): string {
+  const title = conv.title?.trim();
+  if (title) return title;
+  const c = conv.contactId;
+  if (c && typeof c === 'object') {
+    const cc = c as ConversationContact;
+    const name = cc.name?.trim();
+    if (name) return name;
+    const phone = cc.phone?.trim();
+    if (phone) return phone;
+  }
+  return conv.platformUserId;
 }
 
 export function InboxThread() {
@@ -155,6 +169,8 @@ export function InboxThread() {
 
   const { conversation, messages } = data;
 
+  const peerDisplayName = threadPeerLabel(conversation);
+
   const feedbackByMessageId =
     feedbackList && Array.isArray(feedbackList)
       ? feedbackList.reduce<Record<string, any[]>>((acc, fb) => {
@@ -187,7 +203,7 @@ export function InboxThread() {
       <div className="thread-header">
         <Link to="/app/inbox" className="back-link">← Inbox</Link>
         <h1>
-          Bisedë me {conversation.platformUserId}
+          Bisedë me {peerDisplayName}
           <span className="thread-channel">{getChannelLabel(conversation)}</span>
         </h1>
         {conversation.sentimentLabel && (

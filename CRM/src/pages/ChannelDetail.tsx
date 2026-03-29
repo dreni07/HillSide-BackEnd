@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { apiRequest, getStoredToken } from '../services/api';
+import { apiRequest, getStoredToken, syncChannelConnection } from '../services/api';
 import { env } from '../config/env';
 import type { Channel, ChannelPlatform, ChannelStatus } from '../types/channel';
 import { CHANNEL_PLATFORM_LABELS } from '../types/channel';
@@ -17,6 +17,9 @@ export function ChannelDetail() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [reconnectToken, setReconnectToken] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const [syncWarnings, setSyncWarnings] = useState<string[]>([]);
 
   useEffect(() => {
     if (!channelId) return;
@@ -66,7 +69,13 @@ export function ChannelDetail() {
   if (error && !channel) return <div className="page-error" role="alert">{error}</div>;
   if (!channel) return null;
 
-  const needsReconnect = channel.tokenStatus === 'needs_reconnect' || channel.tokenStatus === 'invalid';
+  const canManageCredentials = channel.canManageCredentials !== false;
+  const tokenBlocked =
+    channel.tokenStatus === 'needs_reconnect' ||
+    channel.tokenStatus === 'expired' ||
+    channel.tokenStatus === 'invalid';
+  const tokenExpiringSoon = channel.tokenStatus === 'expiring_soon';
+  const isMetaFamily = ['facebook', 'instagram', 'whatsapp'].includes(channel.platform);
 
   function startMetaOAuth() {
     const token = getStoredToken();
@@ -74,6 +83,38 @@ export function ChannelDetail() {
       return;
     }
     window.location.href = `${env.apiUrl}/api/oauth/meta/start?token=${encodeURIComponent(token)}`;
+  }
+
+  async function handleRefreshConnection() {
+    if (!channelId) return;
+    setSyncing(true);
+    setSyncWarnings([]);
+    setError('');
+    try {
+      const trimmed = reconnectToken.trim();
+      if (trimmed) {
+        await apiRequest<Channel>(`/api/channels/${channelId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ accessToken: trimmed }),
+        });
+      }
+      const { channel: next, warnings } = await syncChannelConnection(channelId);
+      setChannel(next);
+      setReconnectToken('');
+      if (warnings.length > 0) {
+        setSyncWarnings(warnings);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sinkronizimi dështoi.');
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  function formatIso(iso: string | null | undefined): string {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? iso : d.toLocaleString();
   }
 
   return (
@@ -95,8 +136,10 @@ export function ChannelDetail() {
             readOnly
             onClick={(e) => {
               e.preventDefault();
-              if (needsReconnect) {
-                setError('Ky kanal ka nevojë për rilidhje (token-i ka skaduar ose është i pavlefshëm). Rilidhni përmes Meta OAuth.');
+              if (tokenBlocked) {
+                setError(
+                  'Ky kanal ka nevojë për rilidhje (token-i ka skaduar ose është i pavlefshëm). Përdorni panelin “Lidhja me platformën” më poshtë.'
+                );
                 return;
               }
               const next = status === 'active' ? 'inactive' : 'active';
@@ -114,17 +157,124 @@ export function ChannelDetail() {
         </label>
         <span className="channel-chatbot-hint">{status === 'active' ? 'ON – përgjigje automatike' : 'OFF – vetëm përgjigje manuale'}</span>
       </div>
-      {needsReconnect && (
-        <div className="auth-error">
-          Tokeni i këtij kanali ka skaduar ose është bërë i pavlefshëm. Chatbot-i dhe dërgimi i mesazheve mund të mos funksionojnë
-          derisa të rilidhni kanalin.
-          <div style={{ marginTop: '0.5rem' }}>
-            <button type="button" className="btn-primary" onClick={startMetaOAuth}>
-              Rilidhu përmes Meta OAuth
-            </button>
-          </div>
+      {tokenExpiringSoon && (
+        <div className="form-success" role="status">
+          Tokeni Meta skadon së shpejti. Rifreskoni lidhjen ose përditësoni token-in për të shmangur ndërprerjen.
         </div>
       )}
+      {tokenBlocked && (
+        <div className="auth-error">
+          Lidhja me platformën duket e pavlefshëm ose e skaduar. Chatbot-i dhe dërgimi i mesazheve mund të mos funksionojnë derisa të
+          rifreskoni token-in ose të rilidhni.
+          {isMetaFamily && canManageCredentials && (
+            <div style={{ marginTop: '0.5rem' }}>
+              <button type="button" className="btn-primary" onClick={startMetaOAuth}>
+                Rilidhu përmes Meta OAuth
+              </button>
+            </div>
+          )}
+          {!canManageCredentials && (
+            <p className="channel-muted" style={{ marginTop: '0.5rem' }}>
+              Rilidhja me Meta / token kërkon hyrjen si pronari i kanalit (jo si admin i klientit).
+            </p>
+          )}
+        </div>
+      )}
+      <section className="channel-connection-panel" aria-labelledby="conn-heading">
+        <h2 id="conn-heading" className="channel-section-title">
+          Lidhja me platformën
+        </h2>
+        <dl className="channel-connection-dl">
+          <div>
+            <dt>Gjendja e lidhjes</dt>
+            <dd>
+              <span className={`channel-token-status channel-token-status--${channel.tokenStatus ?? 'unknown'}`}>
+                {channel.tokenStatus ?? 'unknown'}
+              </span>
+            </dd>
+          </div>
+          {channel.platform === 'whatsapp' && (
+            <>
+              <div>
+                <dt>WABA ID</dt>
+                <dd>{channel.whatsappBusinessAccountId ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Phone Number ID</dt>
+                <dd>{channel.whatsappPhoneNumberId ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Telefon (shfaqje)</dt>
+                <dd>{channel.whatsappDisplayPhoneNumber ?? '—'}</dd>
+              </div>
+            </>
+          )}
+          {isMetaFamily && (
+            <div>
+              <dt>Skadimi i token-it (Meta)</dt>
+              <dd>{formatIso(channel.metaTokenExpiresAt)}</dd>
+            </div>
+          )}
+          {channel.platform === 'viber' && (
+            <>
+              <div>
+                <dt>Webhook i regjistruar</dt>
+                <dd>{formatIso(channel.viberWebhookRegisteredAt)}</dd>
+              </div>
+              <div>
+                <dt>URL webhook (Viber PA)</dt>
+                <dd>
+                  <code className="channel-code-inline">{`${env.apiUrl}/api/webhooks/viber`}</code>
+                </dd>
+              </div>
+            </>
+          )}
+          {(channel.connectionError || channel.connectionErrorAt) && (
+            <div>
+              <dt>Gabim i fundit</dt>
+              <dd>
+                {channel.connectionError ?? '—'}
+                {channel.connectionErrorCode ? (
+                  <span className="channel-muted"> [{channel.connectionErrorCode}]</span>
+                ) : null}
+                {channel.connectionErrorAt ? (
+                  <span className="channel-muted"> ({formatIso(channel.connectionErrorAt)})</span>
+                ) : null}
+              </dd>
+            </div>
+          )}
+        </dl>
+        {canManageCredentials ? (
+          <>
+            <label className="channel-reconnect-token-label">
+              Token i ri (opsional — Meta ose Viber PA)
+              <input
+                type="password"
+                value={reconnectToken}
+                onChange={(e) => setReconnectToken(e.target.value)}
+                placeholder="Lëreni bosh për të rifreskuar me token-in e ruajtur"
+                autoComplete="off"
+              />
+            </label>
+            <div className="channel-connection-actions">
+              <button type="button" className="btn-primary" disabled={syncing} onClick={() => void handleRefreshConnection()}>
+                {syncing ? 'Duke rifreskuar…' : 'Rifresko lidhjen'}
+              </button>
+            </div>
+            {syncWarnings.length > 0 && (
+              <ul className="channel-sync-warnings" role="list">
+                {syncWarnings.map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            )}
+          </>
+        ) : (
+          <p className="channel-muted">
+            Rifreskimi i lidhjes dhe futja e token-it të ri janë të kufizuara për pronarin e kanalit.
+          </p>
+        )}
+      </section>
       <form onSubmit={handleSubmit} className="channel-detail-form">
         {error && <div className="auth-error">{error}</div>}
         {saveSuccess && <div className="form-success">U ruajt me sukses.</div>}

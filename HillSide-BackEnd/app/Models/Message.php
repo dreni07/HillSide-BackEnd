@@ -13,9 +13,25 @@ class Message extends Model
     protected $fillable = [
         'conversation_id',
         'user_id',
+        'platform_message_id',
         'text',
         'is_from_user',
+        'direction',
+        'sender_type',
+        'raw_payload',
+        'attachments',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'raw_payload' => 'array',
+            'attachments' => 'array',
+        ];
+    }
 
     public function conversation(): BelongsTo
     {
@@ -27,4 +43,3 @@ class Message extends Model
         return $this->belongsTo(User::class);
     }
 }
-

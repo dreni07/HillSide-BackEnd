@@ -24,9 +24,21 @@ function formatDate(dateStr: string | null) {
 
 function getDisplayUser(conv: Conversation): string {
   const c = conv.contactId;
-  if (c && typeof c === 'object' && 'name' in c && (c as ConversationContact).name)
-    return (c as ConversationContact).name!;
+  if (c && typeof c === 'object') {
+    const cc = c as ConversationContact;
+    const name = cc.name?.trim();
+    if (name) return name;
+    const phone = cc.phone?.trim();
+    if (phone) return phone;
+  }
   return conv.platformUserId;
+}
+
+/** Titulli i bisedës në listë: title nga DB, pastaj emri i kontaktit, pastaj ID platforme. */
+function getConversationListLabel(conv: Conversation): string {
+  const t = conv.title?.trim();
+  if (t) return t;
+  return getDisplayUser(conv);
 }
 
 function getChannelLabel(conv: Conversation): string {
@@ -123,7 +135,7 @@ export function Inbox() {
           {conversations.map((conv) => (
             <li key={conv._id}>
               <Link to={`/app/inbox/${conv._id}`} className="conversation-row">
-                <span className="conv-user">{getDisplayUser(conv)}</span>
+                <span className="conv-user">{getConversationListLabel(conv)}</span>
                 <span className="conv-channel">{getChannelLabel(conv)}</span>
                 <span className={getSentimentBadgeClass(conv.sentimentLabel)}>
                   {getSentimentLabelText(conv.sentimentLabel)}

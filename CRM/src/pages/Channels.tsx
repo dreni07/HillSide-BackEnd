@@ -259,12 +259,16 @@ function AddChannelModal({ onClose, onSuccess }: AddChannelModalProps) {
   const [platform, setPlatform] = useState<ChannelPlatform>('instagram');
   const [name, setName] = useState('');
   const [platformPageId, setPlatformPageId] = useState('');
+  const [whatsappPhoneNumberId, setWhatsappPhoneNumberId] = useState('');
+  const [whatsappBusinessAccountId, setWhatsappBusinessAccountId] = useState('');
+  const [whatsappDisplayPhoneNumber, setWhatsappDisplayPhoneNumber] = useState('');
   const [viberBotId, setViberBotId] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const isViber = platform === 'viber';
+  const isWhatsapp = platform === 'whatsapp';
 
   function startMetaOAuth() {
     const token = getStoredToken();
@@ -281,6 +285,10 @@ function AddChannelModal({ onClose, onSuccess }: AddChannelModalProps) {
       setError('Tokeni i aksesit është i detyrueshëm.');
       return;
     }
+    if (isWhatsapp && !whatsappPhoneNumberId.trim() && !platformPageId.trim()) {
+      setError('Për WhatsApp duhet Phone Number ID (ose Page ID si alias).');
+      return;
+    }
     setSubmitting(true);
     const body: Record<string, unknown> = {
       platform,
@@ -289,6 +297,11 @@ function AddChannelModal({ onClose, onSuccess }: AddChannelModalProps) {
     };
     if (isViber) {
       body.viberBotId = viberBotId.trim() || null;
+    } else if (isWhatsapp) {
+      body.whatsappPhoneNumberId = whatsappPhoneNumberId.trim() || null;
+      body.platformPageId = platformPageId.trim() || null;
+      body.whatsappBusinessAccountId = whatsappBusinessAccountId.trim() || null;
+      body.whatsappDisplayPhoneNumber = whatsappDisplayPhoneNumber.trim() || null;
     } else {
       body.platformPageId = platformPageId.trim() || null;
     }
@@ -353,6 +366,45 @@ function AddChannelModal({ onClose, onSuccess }: AddChannelModalProps) {
                 placeholder="ID e botit Viber"
               />
             </label>
+          ) : isWhatsapp ? (
+            <>
+              <label>
+                Phone Number ID (Meta) <span className="required">*</span>
+                <input
+                  type="text"
+                  value={whatsappPhoneNumberId}
+                  onChange={(e) => setWhatsappPhoneNumberId(e.target.value)}
+                  placeholder="ID e numrit nga WhatsApp Cloud API"
+                />
+              </label>
+              <label>
+                WABA ID (opsional)
+                <input
+                  type="text"
+                  value={whatsappBusinessAccountId}
+                  onChange={(e) => setWhatsappBusinessAccountId(e.target.value)}
+                  placeholder="WhatsApp Business Account ID"
+                />
+              </label>
+              <label>
+                Telefon për shfaqje (opsional)
+                <input
+                  type="text"
+                  value={whatsappDisplayPhoneNumber}
+                  onChange={(e) => setWhatsappDisplayPhoneNumber(e.target.value)}
+                  placeholder="p.sh. +355 69 123 4567"
+                />
+              </label>
+              <label>
+                Page ID (alias për Phone Number ID, nëse përdorni të njëjtin fushë)
+                <input
+                  type="text"
+                  value={platformPageId}
+                  onChange={(e) => setPlatformPageId(e.target.value)}
+                  placeholder="Opsional — nëse bosh, përdoret vetëm Phone Number ID sipër"
+                />
+              </label>
+            </>
           ) : (
             <label>
               Page ID / Faqe (opsional për Meta)

@@ -6,6 +6,7 @@
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios';
 import { env } from '../config/env';
 import type { StoredUser, ApiSuccess, ApiError, ApiResponse, AuthResponse } from '../types/api';
+import type { Channel } from '../types/channel';
 
 export type {
   StoredUser,
@@ -97,6 +98,18 @@ export function extractValidationMessage(data: unknown): string | null {
   return null;
 }
 
+/** Mesazh gabimi nga përgjigjet `{ success: false, message, errorCode? }` (Laravel / outbound). */
+export function extractApiFailureMessage(data: unknown): string | null {
+  const base = extractValidationMessage(data);
+  if (!base) return null;
+  if (!data || typeof data !== 'object') return sanitizeApiUserMessage(base);
+  const code = (data as { errorCode?: string }).errorCode;
+  if (typeof code === 'string' && code.trim() !== '') {
+    return sanitizeApiUserMessage(`${base} [${code}]`);
+  }
+  return sanitizeApiUserMessage(base);
+}
+
 /** Heq HTML nga mesazhet e gabimit (kur PHP shton Notice para JSON). */
 export function sanitizeApiUserMessage(raw: string): string {
   return raw
@@ -126,6 +139,45 @@ function parseJsonBodyLenient(rawText: string): { ok: true; value: unknown } | {
     }
   }
   return { ok: false };
+}
+
+export interface ChannelSyncResult {
+  channel: Channel;
+  warnings: string[];
+}
+
+/** Rifreskon lidhjen (Meta debug_token / Viber set_webhook) dhe kthen kanalin e përditësuar. */
+export async function syncChannelConnection(channelId: string): Promise<ChannelSyncResult> {
+  try {
+    const res = await apiClient.post<ApiSuccess<Channel> & { sync?: { warnings?: string[] } }>(
+      `/api/channels/${channelId}/sync-connection`
+    );
+    const body = res.data;
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'success' in body &&
+      (body as ApiSuccess<Channel>).success === true
+    ) {
+      const sync = (body as { sync?: { warnings?: string[] } }).sync;
+      return {
+        channel: (body as ApiSuccess<Channel>).data,
+        warnings: Array.isArray(sync?.warnings) ? sync.warnings : [],
+      };
+    }
+    throw new Error('Përgjigje e papritur nga serveri.');
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      if (error.response.status === 401) {
+        handleUnauthorized();
+      }
+      const msg =
+        extractApiFailureMessage(error.response.data) ??
+        (error.response.statusText || 'Gabim në server.');
+      throw new Error(msg);
+    }
+    throw error instanceof Error ? error : new Error('Gabim në komunikim me serverin.');
+  }
 }
 
 export async function apiRequest<T>(
@@ -178,11 +230,7 @@ export async function apiRequest<T>(
     }
 
     const errMsg =
-      (typeof body === 'object' &&
-        body !== null &&
-        'message' in body &&
-        typeof (body as ApiError).message === 'string' &&
-        (body as ApiError).message) ||
+      extractApiFailureMessage(body) ||
       (res.status === 403
         ? 'Nuk keni qasje.'
         : res.status === 404
@@ -198,11 +246,12 @@ export async function apiRequest<T>(
         handleUnauthorized();
       }
       if (error.response.status === 422) {
-        const msg = extractValidationMessage(error.response.data) ?? 'Të dhënat e futura nuk janë të vlefshme.';
+        const msg =
+          extractApiFailureMessage(error.response.data) ?? 'Të dhënat e futura nuk janë të vlefshme.';
         throw new Error(msg);
       }
       const msg =
-        extractValidationMessage(error.response.data) ??
+        extractApiFailureMessage(error.response.data) ??
         (error.response.statusText || 'Gabim në server. Provoni përsëri më vonë.');
       throw new Error(msg);
     }
