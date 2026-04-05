@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Channel;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Support\InboxPresenter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class ConversationController extends Controller
 {
@@ -20,7 +19,7 @@ class ConversationController extends Controller
         $adminUserId = $request->query('userId');
 
         $query = Conversation::query()
-            ->with('channel');
+            ->with(['channel', 'contact']);
 
         if ($user->is_admin && $adminUserId) {
             $query->where('user_id', (int) $adminUserId);
@@ -36,54 +35,34 @@ class ConversationController extends Controller
 
         $conversationIds = $conversations->pluck('id');
 
-        $lastMessages = Message::query()
+        $messagesByConversation = Message::query()
             ->whereIn('conversation_id', $conversationIds)
             ->orderBy('created_at')
             ->get()
-            ->groupBy('conversation_id')
-            ->map(function ($group) {
-                /** @var \Illuminate\Support\Collection<int, Message> $group */
-                return $group->last();
-            });
+            ->groupBy('conversation_id');
 
-        $result = $conversations->map(function (Conversation $conversation) use ($lastMessages) {
-            /** @var Channel|null $channel */
-            $channel = $conversation->channel;
-            /** @var Message|null $lastMessage */
-            $lastMessage = $lastMessages->get($conversation->id);
+        $result = $conversations->map(function (Conversation $conversation) use ($messagesByConversation) {
+            $messages = $messagesByConversation->get($conversation->id) ?? collect();
+            $picked = InboxPresenter::pickLastMessages($messages);
 
-            $lastMessageAt = $lastMessage
-                ? ($lastMessage->created_at instanceof Carbon
-                    ? $lastMessage->created_at->toIso8601String()
-                    : Carbon::parse($lastMessage->created_at)->toIso8601String())
-                : null;
-
-            return [
-                '_id' => (string) $conversation->id,
-                'channelId' => $channel ? [
-                    '_id' => (string) $channel->id,
-                    'name' => $channel->name,
-                    'platform' => $channel->platform,
-                ] : (string) $conversation->channel_id,
-                'platformUserId' => 'Unknown',
-                'platformConversationId' => null,
-                'lastMessageAt' => $lastMessageAt,
-                'lastUserMessageAt' => $lastMessageAt,
-                'metadata' => [],
-                'contactId' => null,
-                'createdAt' => $conversation->created_at?->toIso8601String(),
-                'updatedAt' => $conversation->updated_at?->toIso8601String(),
-                'sentimentScore' => null,
-                'sentimentLabel' => null,
-                'lastSentimentAt' => null,
-                'sentimentMessageCount' => null,
-            ];
+            return InboxPresenter::conversationToArray(
+                $conversation,
+                $picked['last'],
+                $picked['lastInbound']
+            );
         });
+
+        $sorted = $result
+            ->sortByDesc(function (array $row) {
+                $at = $row['lastMessageAt'] ?? null;
+
+                return is_string($at) && $at !== '' ? $at : '1970-01-01T00:00:00+00:00';
+            })
+            ->values();
 
         return response()->json([
             'success' => true,
-            'data' => $result,
+            'data' => $sorted,
         ]);
     }
 }
-

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Channel;
 use App\Models\User;
+use App\Services\Channels\ChannelConnectionSyncer;
 use App\Services\MetaFacebookGraphService;
 use App\Services\MetaFacebookOAuthService;
 use App\Support\ChannelCrmPresenter;
@@ -26,43 +27,43 @@ class MetaOAuthController extends Controller
     public function start(Request $request): RedirectResponse
     {
         $meta = config('services.meta');
-        $channelsUrl = $meta['frontend_url'] . '/app/channels';
+        $channelsUrl = $meta['frontend_url'].'/app/channels';
 
         $token = $request->query('token');
         if (! is_string($token) || $token === '') {
-            return redirect()->away($channelsUrl . '?oauth_error=missing_token');
+            return redirect()->away($channelsUrl.'?oauth_error=missing_token');
         }
 
         $payload = Jwt::decodeAndVerify($token);
         if ($payload === null || ! isset($payload['sub']) || ! is_numeric($payload['sub'])) {
-            return redirect()->away($channelsUrl . '?oauth_error=invalid_token');
+            return redirect()->away($channelsUrl.'?oauth_error=invalid_token');
         }
 
         $userId = (int) $payload['sub'];
         if (! User::query()->whereKey($userId)->exists()) {
-            return redirect()->away($channelsUrl . '?oauth_error=invalid_token');
+            return redirect()->away($channelsUrl.'?oauth_error=invalid_token');
         }
 
         $appId = $meta['app_id'] ?? null;
         $redirectUri = $meta['redirect_uri'] ?? null;
         if (! is_string($appId) || $appId === '' || ! is_string($redirectUri) || $redirectUri === '') {
-            return redirect()->away($channelsUrl . '?oauth_error=oauth_failed');
+            return redirect()->away($channelsUrl.'?oauth_error=oauth_failed');
         }
 
         $scopes = $meta['scopes'] ?? [];
         if (! is_array($scopes) || $scopes === []) {
-            return redirect()->away($channelsUrl . '?oauth_error=oauth_failed');
+            return redirect()->away($channelsUrl.'?oauth_error=oauth_failed');
         }
 
         $baseUrl = rtrim((string) ($meta['oauth_url'] ?? ''), '/');
         if ($baseUrl === '') {
-            return redirect()->away($channelsUrl . '?oauth_error=oauth_failed');
+            return redirect()->away($channelsUrl.'?oauth_error=oauth_failed');
         }
 
         $oauthState = Str::random(40);
         $stateTtl = max(120, (int) ($meta['oauth_state_ttl'] ?? 900));
         Cache::put(
-            'meta_oauth_state:' . $oauthState,
+            'meta_oauth_state:'.$oauthState,
             ['user_id' => $userId],
             $stateTtl
         );
@@ -75,7 +76,7 @@ class MetaOAuthController extends Controller
             'scope' => implode(',', $scopes),
         ];
 
-        $authorizeUrl = $baseUrl . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        $authorizeUrl = $baseUrl.'?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 
         return redirect()->away($authorizeUrl);
     }
@@ -87,21 +88,21 @@ class MetaOAuthController extends Controller
     public function callback(Request $request): RedirectResponse
     {
         $meta = config('services.meta');
-        $channelsUrl = $meta['frontend_url'] . '/app/channels';
+        $channelsUrl = $meta['frontend_url'].'/app/channels';
 
         if ($request->filled('error')) {
-            return redirect()->away($channelsUrl . '?oauth_error=oauth_failed');
+            return redirect()->away($channelsUrl.'?oauth_error=oauth_failed');
         }
 
         $code = $request->query('code');
         $state = $request->query('state');
         if (! is_string($code) || $code === '' || ! is_string($state) || $state === '') {
-            return redirect()->away($channelsUrl . '?oauth_error=missing_code_or_state');
+            return redirect()->away($channelsUrl.'?oauth_error=missing_code_or_state');
         }
 
-        $statePayload = Cache::pull('meta_oauth_state:' . $state);
+        $statePayload = Cache::pull('meta_oauth_state:'.$state);
         if (! is_array($statePayload) || ! isset($statePayload['user_id']) || ! is_numeric($statePayload['user_id'])) {
-            return redirect()->away($channelsUrl . '?oauth_error=session_expired_or_invalid');
+            return redirect()->away($channelsUrl.'?oauth_error=session_expired_or_invalid');
         }
 
         $userId = (int) $statePayload['user_id'];
@@ -112,14 +113,14 @@ class MetaOAuthController extends Controller
         if (! is_string($appId) || $appId === ''
             || ! is_string($appSecret) || $appSecret === ''
             || ! is_string($redirectUri) || $redirectUri === '') {
-            return redirect()->away($channelsUrl . '?oauth_error=oauth_failed');
+            return redirect()->away($channelsUrl.'?oauth_error=oauth_failed');
         }
 
         try {
             $short = MetaFacebookOAuthService::shortLivedUserTokenFromCode($code);
             $shortToken = $short['access_token'];
         } catch (\Throwable) {
-            return redirect()->away($channelsUrl . '?oauth_error=oauth_failed');
+            return redirect()->away($channelsUrl.'?oauth_error=oauth_failed');
         }
 
         try {
@@ -140,7 +141,7 @@ class MetaOAuthController extends Controller
         $expiresAt = $expiresIn !== null ? time() + $expiresIn : null;
 
         Cache::put(
-            'meta_oauth:' . $sessionKey,
+            'meta_oauth:'.$sessionKey,
             [
                 'user_id' => $userId,
                 'access_token' => $accessToken,
@@ -149,7 +150,7 @@ class MetaOAuthController extends Controller
             $ttlSeconds
         );
 
-        return redirect()->away($channelsUrl . '?oauth=meta&key=' . urlencode($sessionKey));
+        return redirect()->away($channelsUrl.'?oauth=meta&key='.urlencode($sessionKey));
     }
 
     /**
@@ -162,7 +163,7 @@ class MetaOAuthController extends Controller
             return response()->json(['success' => false, 'message' => 'Mungon çelësi i sesionit.'], 422);
         }
 
-        $session = Cache::get('meta_oauth:' . $key);
+        $session = Cache::get('meta_oauth:'.$key);
         if (! is_array($session)) {
             return response()->json([
                 'success' => false,
@@ -197,7 +198,7 @@ class MetaOAuthController extends Controller
     /**
      * Create a channel from a selected page or Instagram account; consumes OAuth session cache entry.
      */
-    public function connect(Request $request): JsonResponse
+    public function connect(Request $request, ChannelConnectionSyncer $syncer): JsonResponse
     {
         $validated = $request->validate([
             'oauthKey' => ['required', 'string'],
@@ -211,7 +212,7 @@ class MetaOAuthController extends Controller
         $platformPageId = $validated['platformPageId'];
         $displayName = isset($validated['name']) && is_string($validated['name']) ? trim($validated['name']) : '';
 
-        $session = Cache::get('meta_oauth:' . $oauthKey);
+        $session = Cache::get('meta_oauth:'.$oauthKey);
         if (! is_array($session)) {
             return response()->json([
                 'success' => false,
@@ -272,12 +273,13 @@ class MetaOAuthController extends Controller
             'meta_access_token' => $resolved['access_token'],
         ]);
 
-        Cache::forget('meta_oauth:' . $oauthKey);
+        Cache::forget('meta_oauth:'.$oauthKey);
+
+        $syncer->sync($channel->fresh());
 
         return response()->json([
             'success' => true,
-            'data' => ChannelCrmPresenter::toArray($channel),
+            'data' => ChannelCrmPresenter::toArray($channel->fresh(), $request->user()),
         ], 201);
     }
 }
-

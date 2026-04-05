@@ -13,7 +13,10 @@ use App\Services\ProductUpload\Ocr\TesseractOcrEngine;
 use App\Services\ProductUpload\ProductUploadService;
 use App\Services\ProductUpload\Strategies\PdfParsingStrategy;
 use App\Services\ProductUpload\Strategies\SpreadsheetParsingStrategy;
+use App\Events\InboundMessageStored;
+use App\Listeners\DispatchInboundAiReplyJob;
 use App\Support\TesseractPathResolver;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -76,6 +79,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Event::listen(InboundMessageStored::class, DispatchInboundAiReplyJob::class);
     }
 }

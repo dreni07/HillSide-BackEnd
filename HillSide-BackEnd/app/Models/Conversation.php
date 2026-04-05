@@ -14,9 +14,22 @@ class Conversation extends Model
     protected $fillable = [
         'channel_id',
         'user_id',
+        'contact_id',
         'title',
         'status',
+        'platform_conversation_id',
+        'metadata',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'metadata' => 'array',
+        ];
+    }
 
     public function channel(): BelongsTo
     {
@@ -28,9 +41,13 @@ class Conversation extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
     }
 }
-

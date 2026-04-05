@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AiConfigController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\BusinessTypeController;
+use App\Http\Controllers\Api\ChannelConnectionController;
 use App\Http\Controllers\Api\ChannelController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ConversationController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Api\MetaOAuthController;
 use App\Http\Controllers\Api\ProductUploadController;
 use App\Http\Controllers\Api\StatsController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Webhooks\MetaWebhookController;
+use App\Http\Controllers\Webhooks\ViberWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,6 +32,12 @@ Route::controller(AuthController::class)->prefix('auth')->group(function () {
 Route::controller(MetaOAuthController::class)->prefix('oauth')->group(function () {
     Route::get('meta/start', 'start');
     Route::get('meta/callback', 'callback');
+});
+
+Route::prefix('webhooks')->group(function () {
+    Route::get('meta', [MetaWebhookController::class, 'verify']);
+    Route::post('meta', [MetaWebhookController::class, 'handle']);
+    Route::post('viber', [ViberWebhookController::class, 'handle']);
 });
 
 /*
@@ -77,6 +86,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::controller(ChannelController::class)->prefix('channels')->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
+        Route::post('{channel}/sync-connection', [ChannelConnectionController::class, 'sync']);
         Route::get('{channel}', 'show');
         Route::put('{channel}', 'update');
         Route::delete('{channel}', 'destroy');

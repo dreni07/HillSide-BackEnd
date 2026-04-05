@@ -4,6 +4,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Inbound auto-reply (queued after webhook stores a customer message)
+    |--------------------------------------------------------------------------
+    |
+    | Requires a queue worker when QUEUE_CONNECTION is not "sync", plus an
+    | active AiConfig for the channel owner's first business.
+    |
+    */
+    'auto_reply' => [
+        'enabled' => filter_var(env('AI_AUTO_REPLY_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Groq / OpenAI-compatible chat API
     |--------------------------------------------------------------------------
     |

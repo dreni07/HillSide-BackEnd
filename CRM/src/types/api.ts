@@ -16,6 +16,9 @@ export interface ApiSuccess<T> {
 export interface ApiError {
   success: false;
   message: string;
+  /** Kodi nga backend (p.sh. dërgim platforme: channel_token_invalid, whatsapp_policy_window). */
+  errorCode?: string;
+  provider?: unknown;
 }
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError;

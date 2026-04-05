@@ -1343,6 +1343,99 @@ body {
   font-size: 0.875rem;
 }
 
+.channel-section-title {
+  font-size: 1.125rem;
+  margin: 1.5rem 0 0.75rem;
+  font-weight: 600;
+}
+.channel-connection-panel {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+.channel-connection-dl {
+  margin: 0 0 1rem;
+}
+.channel-connection-dl > div {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+.channel-connection-dl dt {
+  margin: 0;
+  color: #718096;
+  font-weight: 500;
+}
+.channel-connection-dl dd {
+  margin: 0;
+  word-break: break-word;
+}
+.channel-muted {
+  color: #718096;
+  font-size: 0.8125rem;
+}
+.channel-code-inline {
+  font-size: 0.8125rem;
+  background: #edf2f7;
+  padding: 0.125rem 0.35rem;
+  border-radius: 4px;
+}
+.channel-token-status {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.channel-token-status--valid {
+  background: #c6f6d5;
+  color: #276749;
+}
+.channel-token-status--expiring_soon {
+  background: #feebc8;
+  color: #c05621;
+}
+.channel-token-status--expired,
+.channel-token-status--needs_reconnect,
+.channel-token-status--invalid {
+  background: #fed7d7;
+  color: #c53030;
+}
+.channel-token-status--unknown {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+.channel-reconnect-token-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+.channel-reconnect-token-label input {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.channel-connection-actions {
+  margin-top: 0.5rem;
+}
+.channel-sync-warnings {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: #c05621;
+}
+
 /* Inbox */
 .page-inbox h1,
 .page-inbox-thread h1 {

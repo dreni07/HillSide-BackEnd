@@ -61,6 +61,35 @@ return [
                 'pages_show_list,pages_read_engagement,pages_manage_metadata,pages_messaging,instagram_basic,instagram_manage_messages'
             ))
         ))),
+        /** Must match Meta Developer → Webhooks → Verify Token (GET subscription challenge). */
+        'webhook_verify_token' => env('META_WEBHOOK_VERIFY_TOKEN'),
+        /**
+         * If true, POST /webhooks/meta skips X-Hub-Signature-256 checks (local tunnel testing only).
+         */
+        'webhook_skip_signature' => filter_var(env('META_WEBHOOK_SKIP_SIGNATURE', false), FILTER_VALIDATE_BOOLEAN),
+    ],
+
+    /*
+     * Dërgim mesazhesh nga CRM drejt platformave (Messenger, Instagram DM, WhatsApp Cloud, Viber).
+     */
+    'outbound' => [
+        /**
+         * Nëse true, nuk bëhen thirrje HTTP; kthehet një message_id simuluar (vetëm zhvillim/test).
+         */
+        'skip_network' => filter_var(env('OUTBOUND_SKIP_NETWORK', false), FILTER_VALIDATE_BOOLEAN),
+    ],
+
+    'viber' => [
+        'send_url' => env('VIBER_SEND_URL', 'https://chatapi.viber.com/pa/send_message'),
+        'set_webhook_url' => env('VIBER_SET_WEBHOOK_URL', 'https://chatapi.viber.com/pa/set_webhook'),
+    ],
+
+    /*
+     * URL publike ku platformat (Viber, Meta) mund të arrijnë API-në (webhooks).
+     * Nëse API është pas reverse proxy / domeni tjetër nga APP_URL, vendoseni PUBLIC_API_URL.
+     */
+    'integrations' => [
+        'public_api_url' => rtrim((string) (env('PUBLIC_API_URL') ?: env('APP_URL', 'http://localhost')), '/'),
     ],
 
     /*

@@ -18,6 +18,9 @@ export interface ConversationContact {
 export interface Conversation {
   _id: string;
   channelId: string | ConversationChannel;
+  /** Titull opsional në CRM; nëse mungon, UI përdor platformUserId / kontaktin. */
+  title?: string | null;
+  status?: string | null;
   platformUserId: string;
   platformConversationId: string | null;
   lastMessageAt: string | null;
@@ -40,6 +43,8 @@ export interface Message {
   timestamp: string;
   platformMessageId: string | null;
   senderType?: 'customer' | 'human_agent' | 'ai' | null;
+  attachments?: unknown[] | Record<string, unknown> | null;
+  rawPayload?: Record<string, unknown> | null;
   sentimentScore?: number | null;
   sentimentLabel?: 'negative' | 'neutral' | 'positive' | 'mixed' | null;
   sentimentProvider?: string | null;
